@@ -19,11 +19,9 @@ void setup() {
 
 void loop() {
   digitalWrite(clkEnablePin, HIGH);
-  delay(500);
   digitalWrite(dataEnablePin, HIGH);
-  delay(500);
   digitalWrite(clkEnablePin, LOW);
-  delay(500);
+  delay(1000);
   digitalWrite(dataEnablePin, LOW);
-  delay(500);
+  delay(2000);
 }
