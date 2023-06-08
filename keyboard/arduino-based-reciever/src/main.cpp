@@ -1,3 +1,4 @@
+#include "USBAPI.h"
 #include "pins_arduino.h"
 #include <Arduino.h>
 
@@ -62,11 +63,12 @@ void loop() {
     digitalWrite(dataEnablePin, HIGH);
     digitalWrite(clkEnablePin, LOW);
     attachInterrupt(digitalPinToInterrupt(clkISR), Message_ISR, FALLING);
-  }
-  if (cur_bit >= 89) {
+  } else if (cur_bit >= 89) {
     detachInterrupt(digitalPinToInterrupt(clkISR));
     Serial.println("done");
     cur_bit = 0;
+  } else {
+    Serial.println(cur_bit);
   }
 }
 
