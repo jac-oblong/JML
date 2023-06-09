@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 
-const int clkISR        = 20;
+const int clkISR        = 21;
 const int clkPin        = 22;
 const int dataPin       = 24;
 const int clkEnablePin  = 26;
@@ -51,7 +51,7 @@ void setup() {
   pinMode(clkEnablePin, OUTPUT);
   pinMode(dataEnablePin, OUTPUT);
 
-  attachInterrupt(digitalPinToInterrupt(clkISR), Message_ISR, FALLING);
+  attachInterrupt(digitalPinToInterrupt(clkISR), Message_ISR, RISING);
 }
 
 void loop() {
@@ -62,14 +62,14 @@ void loop() {
     digitalWrite(clkEnablePin, HIGH);
     digitalWrite(dataEnablePin, HIGH);
     digitalWrite(clkEnablePin, LOW);
-    attachInterrupt(digitalPinToInterrupt(clkISR), Message_ISR, FALLING);
-  } else if (cur_bit >= 89) {
+    attachInterrupt(digitalPinToInterrupt(clkISR), Message_ISR, RISING);
+  } /*else if (cur_bit >= 89) {
     detachInterrupt(digitalPinToInterrupt(clkISR));
     Serial.println("done");
     cur_bit = 0;
   } else {
     Serial.println(cur_bit);
-  }
+  }*/
 }
 
 void Message_ISR() {
@@ -77,11 +77,13 @@ void Message_ISR() {
     begin = true;
     return;
   }
-  if (cur_bit % 22 == 21) {
+  /*if (cur_bit % 22 == 21) {
     digitalWrite(clkEnablePin, HIGH);
   }
   cur_bit++;
   // need to flip bit as we are using a transistor to pull the line low
   digitalWrite(dataEnablePin, !message[cur_bit]);
+  detachInterrupt(digitalPinToInterrupt(clkISR));
   digitalWrite(clkEnablePin, LOW);
+  attachInterrupt(digitalPinToInterrupt(clkISR), Message_ISR, RISING);*/
 }
