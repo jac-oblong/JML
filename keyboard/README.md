@@ -15,6 +15,10 @@ receiving a response in order to tell if it should be using ps/2 or usb
 protocol. Because of this, the computer will send the code `0xFF` (the code for
 reset) when `0xAA` is received.
 
+Some links I found helpful in discovering this problem:
+[StackExchange](https://electronics.stackexchange.com/questions/625609/scan-codes-from-ps-2-keyboard-misbehaviors)
+[Reddit](https://www.reddit.com/r/beneater/comments/m836ul/ps2_keyboard_not_working_on_the_6502_but_is/)
+
 ## Directory Organization
 
 The `arduino-based-reciever` directory has code for an initial version of the
