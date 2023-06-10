@@ -8,6 +8,12 @@ computer should work for native ps/2 keyboards in addition to this odd keyboard.
 
 ## Changes to Normal ps/2 protocol
 
+Normal ps/2 keyboards will send usually send the code `0xAA` to the computer if
+they are working correctly on bootup, and then continue with normal operation.
+The **PERIBOARD-409P**, however, will continually send that scancode until
+receiving a response in order to tell if it should be using ps/2 or usb
+protocol. Because of this, the computer will send the code `0xFF` (the code for
+reset) when `0xAA` is received.
 
 ## Directory Organization
 

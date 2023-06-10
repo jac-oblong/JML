@@ -9,37 +9,19 @@ const int dataPin       = 24;
 const int clkEnablePin  = 26;
 const int dataEnablePin = 28;
 
-/*
- * Want to send this message:
- *  01100111110
- *  00101111111
- *  00000000010
- *  00101111111
- *  01011011110
- *  00101111111
- *  00000000010
- *  00101111111
- *
- * Need to send top-left bit first
- */
-const int message[] = {
-  0,1,1,0,0,1,1,1,1,1,0,
-  0,0,1,0,1,1,1,1,1,1,1,
-  0,0,0,0,0,0,0,0,0,1,0,
-  0,0,1,0,1,1,1,1,1,1,1,
-  0,1,0,1,1,0,1,1,1,1,0,
-  0,0,1,0,1,1,1,1,1,1,1,
-  0,0,0,0,0,0,0,0,0,1,0,
-  0,0,1,0,1,1,1,1,1,1,1,
-  1 // final state we want data line to be in (tied high)
-};
-volatile int cur_bit = 0;
 // need to recieve something from keyboard before sending message to make sure
 // it is plugged in
 volatile bool begin = false;
 bool begun = false;
 
-void Message_ISR();
+volatile int pulses = 0;
+volatile uint16_t data;
+volatile int flag;
+
+
+// initializes the keyboard to ps/2 protocol and read data from keyboard
+void Keyboard_ISR();
+
 
 void setup() {
   Serial.begin(9600);
@@ -51,39 +33,33 @@ void setup() {
   pinMode(clkEnablePin, OUTPUT);
   pinMode(dataEnablePin, OUTPUT);
 
-  attachInterrupt(digitalPinToInterrupt(clkISR), Message_ISR, RISING);
+  attachInterrupt(digitalPinToInterrupt(clkISR), Keyboard_ISR, FALLING);
 }
 
 void loop() {
   if (begin && !begun) {
     begun = true;
-    detachInterrupt(digitalPinToInterrupt(clkISR));
     Serial.println("starting");
     digitalWrite(clkEnablePin, HIGH);
     digitalWrite(dataEnablePin, HIGH);
     digitalWrite(clkEnablePin, LOW);
-    attachInterrupt(digitalPinToInterrupt(clkISR), Message_ISR, RISING);
-  } /*else if (cur_bit >= 89) {
-    detachInterrupt(digitalPinToInterrupt(clkISR));
-    Serial.println("done");
-    cur_bit = 0;
-  } else {
-    Serial.println(cur_bit);
-  }*/
+  }
+  if (flag && pulses && pulses) {
+    Serial.print("0x");
+    Serial.print(data,HEX);
+    Serial.println();
+    flag = data = 0;
+  }
 }
 
-void Message_ISR() {
-  if (!begin || !begun) {
+void Keyboard_ISR() {
+  int x = digitalRead(dataPin) ? 1 : 0;
+  data = (data << 1) | x;
+  pulses++;
+  if (pulses == 11) {
     begin = true;
-    return;
+    flag = 1;
+    pulses = 0;
   }
-  /*if (cur_bit % 22 == 21) {
-    digitalWrite(clkEnablePin, HIGH);
-  }
-  cur_bit++;
-  // need to flip bit as we are using a transistor to pull the line low
-  digitalWrite(dataEnablePin, !message[cur_bit]);
-  detachInterrupt(digitalPinToInterrupt(clkISR));
-  digitalWrite(clkEnablePin, LOW);
-  attachInterrupt(digitalPinToInterrupt(clkISR), Message_ISR, RISING);*/
+  digitalWrite(dataEnablePin, LOW);
 }
