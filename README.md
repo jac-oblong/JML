@@ -17,9 +17,25 @@ used, so changing parts will not be as easy.
 The computer is designed in individual sections that come together to create the
 whole system. This is useful as it makes changing a section easy.
 
-## Organization
-The individual sections each have their own folder with schematics, code, etc.
-There is also a general schematic with a overview of the whole computer.
+## Folder Organization
+Datasheets for parts, in addition to general documentation about the entire
+project can be found in the [docs](/docs/) directory.
 
-Compilers, assemblers, and software are all grouped together in their own
-folder, are general for all sections.
+The assembler used to convert assembly to machine code can be found in the
+[assembler](/assembler/) directory.
+NOTE: Only one assembler is used, but not all components have the same
+instructions. Thus, it is necessary to specify what component in the assembly
+file.
+
+The compiler used to compile C code can be found in the [compiler](/compiler/)
+directory.
+
+Information about the keyboard interface can be found in [keyboard](/keyboard/).
+
+Information about the monitor interface can be found in [monitor](/monitor/).
+
+Information about the different microprocessors can be found in
+[microprocessor](/microprocessor/).
+
+Links to programs designed to be run on the **jml** family of computers can be 
+found in [programs](/programs/)
