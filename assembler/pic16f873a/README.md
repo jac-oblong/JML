@@ -23,11 +23,10 @@ Options:
   Example: `-o out.bin`
 - `-s` can be used to specify the size (number of words/instructions) the output
   file should be. Any space not filled by instructions will be automatically
-  filled with `nop`. Example: `-s 2300`
-- `--word-size` can be used to specify the number of bits used for each machine
-  code instruction. The PIC16F873A has 14-bit instructions, so any number
-  smaller than that will overwrite data. The default value is 16-bit, but any
-  value can be used. Example: `--word-size 32`
+  filled with `nop`. Example: `-s 2300` will write create a file of size 
+  `2300 * opcode-size`. `opcode-size` is set to 2 bytes (each opcode is 14 bits
+  on the PIC16F873A). The default behavior is to convert the entire input file
+  into an output file.
 
 
 ## Instruction Set 
@@ -80,6 +79,10 @@ return `0x01`.
 The following constants are defined by default: `W`(working 
 register/accumulator), `PC` (program counter), `TO` (time-out bit), `PD`
 (power-down bit). They can be overwritten.
+
+#### Commments
+Semicolons are used to comment the rest of the line. Example: `addlw 0x08 ; add
+0x08 to accumulator register`
 
 #### Other
 `.org` can be used to specify where in memory the machine code should be placed.
