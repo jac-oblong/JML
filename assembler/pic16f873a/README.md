@@ -19,8 +19,8 @@ The assembler is very easy to use, simply call the name of executalbe followed
 by the name of the file to assemble.
 
 Options:
-- `-o` can be used to specify the output file (default is `a.out` or `a.o` on a 
-  jml-XX computer). Example: `-o out.bin`
+- `-o` can be used to specify the output file (default is `a.bin`). 
+  Example: `-o out.bin`
 - `-s` can be used to specify the size (number of words/instructions) the output
   file should be. Any space not filled by instructions will be automatically
   filled with `nop`. Example: `-s 2300`
