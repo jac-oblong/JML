@@ -42,7 +42,8 @@ uint8_t instruction_args[35] = {
  * reads a single line from the file specified 
  *
  * the contents of the line will be stored in 'buf', which is expected to be 
- * pointing to heap data so that it can be realloc'd to the proper size 
+ * pointing to heap data so that it can be realloc'd to the proper size, there
+ * is no size requirement for 'buf'
  *
  * returns 0 if file is ended, returns any other number otherwise
  */
@@ -85,9 +86,10 @@ int find_instr(char* instruction) {
  * parses a single line of code and produces the expected opcode output
  *
  * if a change in location is necessary (.org for example) the new location will
- * be returned, otherwise 0 is returned
+ * be returned, if there is an error a negative number is returned, otherwise 
+ * 0 is returned
  */
-unsigned int parse_line(char* line, int16_t opcode) {
+int parse_line(char* line, int16_t* opcode) {
   // TODO: parse input to create opcode output
 }
 
@@ -146,8 +148,12 @@ int main(int argc, char** argv) {
   char* line = (char*)calloc(10, sizeof(char));
   while (read_line(fd_read, line) != 0) {
     int16_t opcode;
-    unsigned int rc = parse_line(line, opcode);
-    if (rc != 0) cur_file_buf_loc = rc;
+    int rc = parse_line(line, &opcode);
+    if (rc < 0) {
+      fprintf(stderr, "ERROR: error on line %d: %s\n", opcode, line);
+      return EXIT_FAILURE;
+    }
+    if (rc > 0) cur_file_buf_loc = rc;
     if (cur_file_buf_loc >= num_words) {
       fprintf(stderr, "WARNING: attempted to write outside of file boundaries\n LINE NUMBER: %d", line_num);
       cur_file_buf_loc++;
