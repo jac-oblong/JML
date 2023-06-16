@@ -8,6 +8,36 @@
 #include <fcntl.h>
 
 
+// legal instructions
+char instructions[35][7] = {
+  "addwf", "andwf", "clrf", "comf", "decf", "decfsz", "incf", "incfsz", "iorwf",
+  "movf", "movwf", "nop", "rlf", "rrf", "subwf", "swapf", "xorwf", "bcf", "bsf",
+  "btfsc", "btfss", "addlw", "andlw", "call", "clrwdt", "goto", "iorlw", 
+  "movlw", "retfie", "retlw", "return", "sleep", "sublw", "xorlw"
+};
+// opcode that corresponds with instruction
+uint16_t opcode[35] = {
+  0x0700, 0x0500, 0x0180, 0x0100, 0x0900, 0x0300, 0x0B00, 0x0A00, 0x0F00, 
+  0x0400, 0x0800, 0x0080, 0x0000, 0x0D00, 0x0C00, 0x0200, 0x0E00, 0x0600, 
+  0x1000, 0x1400, 0x1800, 0x1C00, 0x3E00, 0x3900, 0x2000, 0x0064, 0x2800, 
+  0x3800, 0x3000, 0x0009, 0x3400, 0x0008, 0x0063, 0x3C00, 0x3A00
+};
+/* arguments of instruction; format: <f><d><b><k><k-shift><x><x><x>
+ * 
+ * <f>        : f argument expected
+ * <d>        : d argument expected
+ * <b>        : b argument expected
+ * <k>        : k argument expected
+ * <k-shift>  : how much to shift k; 0->8, 1->11
+ * <x>        : do not care
+ */
+uint8_t instruction_args[35] = {
+  0xC0, 0xC0, 0x80, 0x00, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0x80, 0x00,
+  0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xA0, 0xA0, 0xA0, 0xA0, 0x10, 0x10, 0x18, 0x00,
+  0x18, 0x10, 0x10, 0x00, 0x10, 0x00, 0x00, 0x10, 0x10
+};
+
+
 /*
  * reads a single line from the file specified 
  *
@@ -37,6 +67,18 @@ int read_line(int fd, char* buf) {
   buf[len] = '\0';
 
   return rc;
+}
+
+/*
+ * finds instruction index, returns -1 if not valid instruction
+ */
+int find_instr(char* instruction) {
+  for (int i=0; i < 35; i++) {
+    if ( strcmp(instruction, instructions[i]) == 0 ) {
+      return i;
+    }
+  }
+  return -1;
 }
 
 /*
