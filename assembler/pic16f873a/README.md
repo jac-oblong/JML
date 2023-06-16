@@ -47,7 +47,7 @@ itself and a comma between each "argument".
 
 #### Numbers
 Literal numbers can be be specified in decimal (`128`) in binary (`0b01000000`)
-or in hex (`0x40`).
+or in hex (`0x40`). Octal is not supported.
 
 #### Strings/Characters
 Like **C**, strings should be surrounded by double quotes, and characters by
