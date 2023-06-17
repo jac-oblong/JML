@@ -25,8 +25,8 @@ Options:
   file should be. Any space not filled by instructions will be automatically
   filled with `nop`. Example: `-s 2300` will write create a file of size 
   `2300 * opcode-size`. `opcode-size` is set to 2 bytes (each opcode is 14 bits
-  on the PIC16F873A). The default behavior is to convert the entire input file
-  into an output file.
+  on the PIC16F873A). The default behavior is to create a file of unlimited 
+  size.
 
 
 ## Instruction Set 
@@ -65,26 +65,26 @@ number. Additionally, no more than one underscore can be used in sequence.
 Constants are sequences of characters used to represent a value. It is good
 practice to put constants in all caps, separate words with underscores and place
 all constants at the beginning of the file. A constant can be declared as
-follows: `REG_FILE_ADDR = 0x00`, and used as follows: `clrf REG_FILE_ADDR`.
+follows: `.const REG_FILE_ADDR 0x00`, and used as follows: `clrf REG_FILE_ADDR`.
 During assembly, all instances of `REG_FILE_ADDR` will be replaced with `0x00`.
 Similar to labels, underscores, numbers and letters are all acceptable, but the
 first character cannot be a number. Additionally, no more than one underscore
 can be used in sequence. `____HI__` is not a valid name.
 
-Constants can hold more than one value by using brackets. `CONSTANT_ARRAY[5] =
-{0x00, 0x01, 0x02, 0x03, 0x04}` will "store" the 5 values in `CONSTANT_ARRAY`.
-These values can then be retrieved by using `CONSTANT_ARRAY[1]`, which would
-return `0x01`.
+Constants are restricted to numerical values, but the value is terminated by a
+newline or comment. The size is also restricted to 16 bits.
 
-The following constants are defined by default: `W`(working 
-register/accumulator), `PC` (program counter), `TO` (time-out bit), `PD`
-(power-down bit). They can be overwritten.
+Constants can hold more than one value by using brackets. `.const 
+CONSTANT_ARRAY[5] {0x00, 0x01, 0x02, 0x03, 0x04}` will "store" the 5 values in 
+`CONSTANT_ARRAY`. These values can then be retrieved by using 
+`CONSTANT_ARRAY[1]`, which would return `0x01`. Constant arrays can occur over 
+multiple lines.
 
 #### Commments
 Semicolons are used to comment the rest of the line. Example: `addlw 0x08 ; add
 0x08 to accumulator register`
 
-#### Other
+#### Organization
 `.org` can be used to specify where in memory the machine code should be placed.
 If none is specified, `0x00` is assumed by default. It is up to the programmer
 to make sure that no two blocks of code overwrite each other.
