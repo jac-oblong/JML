@@ -54,12 +54,12 @@ Like **C**, strings should be surrounded by double quotes, and characters by
 single quotes. A null terminator will be appended to each string.
 
 #### Labels
-Labels should be placed on their own line followed by a colon. It is good
+Labels should be placed on their own line preceded by `.label`. It is good
 practice to start a label with an underscore and put the label in all caps. For
-example: `_LOOP:`, which can then be used: `goto _LOOP`. Underscores, numbers,
-and letters are all acceptable in labels, but the first character cannot be a
-number. Additionally, no more than one underscore can be used in sequence. 
-`____HI__` is not a valid name.
+example: `.label _LOOP`, which can then be used: `goto _LOOP`. Underscores, 
+numbers, and letters are all acceptable in labels, but the first character 
+cannot be a number. Additionally, no more than one underscore can be used in 
+sequence. `____HI__` is not a valid name.
 
 #### Constants
 Constants are sequences of characters used to represent a value. It is good

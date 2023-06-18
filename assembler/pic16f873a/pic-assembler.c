@@ -234,7 +234,7 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
     // if length of string is zero, nothing to do anymore
     if (strlen(section) == 0) return -1;
     
-    // '.org' or '.const' command
+    // '.org', '.label' or '.const' command
     if (section[0] == '.') {
       if (strcmp(section, ".org") == 0) { // .org
         char* arg1 = strtok(NULL, " ");
@@ -242,15 +242,18 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
           fprintf(stderr, "ERROR: Line: %d .org expects argument", line_num);
           exit_safely(EXIT_FAILURE);
         }
-        // TODO: finish org
+        // TODO: finish org (use strtok)
+
+      } else if (strcmp(section, ".org") == 0) { // .label
+        // TODO: implement label
 
       } else { // .const
         // TODO: implement const
       }
 
-    // command or label
+    // command
     } else {
-      // TODO: implement command or label
+      // TODO: implement command
     }
 
   } else { // the line was all whitespace
