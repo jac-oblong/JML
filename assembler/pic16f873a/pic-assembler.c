@@ -222,29 +222,53 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
   while (isspace(line[0])) line++;
 
   // get first word, will say what to do with rest of line
-  char* section = strtok(line, " ");
-  if (section != NULL) {
+  char* word1 = strtok(line, " ");
+  if (word1 != NULL) {
     // if semicolon, make end of string
-    for (int i=0; i < strlen(section); i++) {
-      if (section[i] == ';') {
-        section[i] = '\0';
+    for (int i=0; i < strlen(word1); i++) {
+      if (word1[i] == ';') {
+        word1[i] = '\0';
         break;
       }
     }
     // if length of string is zero, nothing to do anymore
-    if (strlen(section) == 0) return -1;
+    if (strlen(word1) == 0) return -1;
     
     // '.org', '.label' or '.const' command
-    if (section[0] == '.') {
-      if (strcmp(section, ".org") == 0) { // .org
+    if (word1[0] == '.') {
+      if (strcmp(word1, ".org") == 0) { // .org
         char* arg1 = strtok(NULL, " ");
         if (arg1 == NULL) {
-          fprintf(stderr, "ERROR: Line: %d .org expects argument", line_num);
+          fprintf(stderr, "ERROR: Line: %d .org expects argument\n", line_num);
           exit_safely(EXIT_FAILURE);
         }
-        // TODO: finish org (use strtok)
+        // TODO: What if variable given instead of number
+        for (int i=0; i < strlen(arg1); i++) {
+          if (isdigit(arg1[i]) || 
+              (arg1[i] == 'x' || arg1[i] == 'X') && i == 1 || 
+              (arg1[i] == 'b' || arg1[i] == 'B') && i == 1) {
+            continue;
+          }
+          fprintf(stderr, "ERROR: Line: %d .org expects number argument\n", line_num);
+          exit_safely(EXIT_FAILURE);
+        }
+        // convert arg1 into a number and return that number
+        int return_val;
+        if (arg1[0] == '0' && (arg1[1] == 'x' || arg1[1] == 'X')) { // hex
+          return_val = strtol(arg1, NULL, 16);
+        } else if (arg1[0] == '0' && (arg1[1] == 'b' || arg1[1] == 'B')) { // binary
+          return_val = strtol(arg1, NULL, 2);
+        } else { // decimal
+          return_val = strtol(arg1, NULL, 10);
+        }
+        // check for unused third command and warn about it 
+        if (strtok(NULL, " ") != NULL) {
+          fprintf(stderr, "WARNING: unused argument for .org on line %d\n", line_num);
+        }
 
-      } else if (strcmp(section, ".org") == 0) { // .label
+        return return_val;
+
+      } else if (strcmp(word1, ".label") == 0) { // .label
         // TODO: implement label
 
       } else { // .const
@@ -288,6 +312,7 @@ void exit_safely(int code) {
   for (int i=0; i < num_vars; i++) {
     free(variables[i]);
   }
+  free(variables);
   free(var_values);
   free(bin_file_buffer);
   free(line);
