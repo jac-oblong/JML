@@ -239,7 +239,7 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
       if (strcmp(word1, ".org") == 0) { // .org
         char* arg1 = strtok(NULL, " ");
         if (arg1 == NULL) {
-          fprintf(stderr, "ERROR: Line: %d .org expects argument\n", line_num);
+          fprintf(stderr, "ERROR: Line %d; .org expects argument\n", line_num);
           exit_safely(EXIT_FAILURE);
         }
         // TODO: What if variable given instead of number
@@ -249,7 +249,7 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
               (arg1[i] == 'b' || arg1[i] == 'B') && i == 1) {
             continue;
           }
-          fprintf(stderr, "ERROR: Line: %d .org expects number argument\n", line_num);
+          fprintf(stderr, "ERROR: Line %d; .org expects number argument\n", line_num);
           exit_safely(EXIT_FAILURE);
         }
         // convert arg1 into a number and return that number
@@ -269,15 +269,68 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
         return return_val;
 
       } else if (strcmp(word1, ".label") == 0) { // .label
-        // TODO: implement label
+        char* label = strtok(NULL, " ");
+        if (label == NULL) {
+          fprintf(stderr, "ERROR: Line %d; .label expects argument\n", line_num);
+          exit_safely(EXIT_FAILURE);
+        }
+        if (get_var(label) != -1) { // overwriting another label
+          fprintf(stderr, "WARNING: Line %d; overwriting label %s\n", line_num, label);
+        }
+        set_var(label, cur_loc);
+        
+        // check for unused third command and warn about it 
+        if (strtok(NULL, " ") != NULL) {
+          fprintf(stderr, "WARNING: unused argument for .label on line %d\n", line_num);
+        }
+
+        return -1; // no opcode given
 
       } else { // .const
-        // TODO: implement const
+        char* name = strtok(NULL, " ");
+        if (name == NULL) {
+          fprintf(stderr, "ERROR: Line %d; .const expects argument\n", line_num);
+          exit_safely(EXIT_FAILURE);
+        }
+        char* value = strtok(NULL, " ");
+        if (value == NULL) {
+          fprintf(stderr, "ERROR: Line %d; .const expects argument\n", line_num);
+          exit_safely(EXIT_FAILURE);
+        }
+
+        // TODO: what about if array of values
+        
+        for (int i=0; i < strlen(value); i++) {
+          if (isdigit(value[i]) || 
+              (value[i] == 'x' || value[i] == 'X') && i == 1 || 
+              (value[i] == 'b' || value[i] == 'B') && i == 1) {
+            continue;
+          }
+          fprintf(stderr, "ERROR: Line %d; .const expects number argument\n", line_num);
+          exit_safely(EXIT_FAILURE);
+        }
+        // convert value into a number and return that number
+        int num_val;
+        if (value[0] == '0' && (value[1] == 'x' || value[1] == 'X')) { // hex
+          num_val = strtol(value, NULL, 16);
+        } else if (value[0] == '0' && (value[1] == 'b' || value[1] == 'B')) { // binary
+          num_val = strtol(value, NULL, 2);
+        } else { // decimal
+          num_val = strtol(value, NULL, 10);
+        }
+
+        set_var(name, num_val);
+        // check for unused third command and warn about it 
+        if (strtok(NULL, " ") != NULL) {
+          fprintf(stderr, "WARNING: unused argument for .const on line %d\n", line_num);
+        }
+
+        return -1; // no opcode given
       }
 
-    // command
+    // instruction
     } else {
-      // TODO: implement command
+      // TODO: implement instruction
     }
 
   } else { // the line was all whitespace
