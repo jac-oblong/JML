@@ -242,8 +242,13 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
           fprintf(stderr, "ERROR: Line %d; .org expects argument\n", line_num);
           exit_safely(EXIT_FAILURE);
         }
-        // TODO: What if variable given instead of number
-        for (int i=0; i < strlen(arg1); i++) {
+        
+        // handle arg1 being a variable
+        bool is_var = false;
+        if (get_var(arg1) != -1) is_var = true;
+        
+        // check if numeric if not var
+        for (int i=0; i < strlen(arg1) && !is_var; i++) {
           if (isdigit(arg1[i]) || 
               (arg1[i] == 'x' || arg1[i] == 'X') && i == 1 || 
               (arg1[i] == 'b' || arg1[i] == 'B') && i == 1) {
@@ -252,9 +257,12 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
           fprintf(stderr, "ERROR: Line %d; .org expects number argument\n", line_num);
           exit_safely(EXIT_FAILURE);
         }
+
         // convert arg1 into a number and return that number
         int return_val;
-        if (arg1[0] == '0' && (arg1[1] == 'x' || arg1[1] == 'X')) { // hex
+        if (is_var) { // variable, so just get the value
+          return_val = var_values[get_var(arg1)];
+        } else if (arg1[0] == '0' && (arg1[1] == 'x' || arg1[1] == 'X')) { // hex
           return_val = strtol(arg1, NULL, 16);
         } else if (arg1[0] == '0' && (arg1[1] == 'b' || arg1[1] == 'B')) { // binary
           return_val = strtol(arg1, NULL, 2);
