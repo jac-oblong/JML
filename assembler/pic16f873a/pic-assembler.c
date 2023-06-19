@@ -69,6 +69,8 @@ int get_instr(char* instruction);
  * is returned */
 int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num); 
 
+// TODO: make function to set up a const array
+
 /* gets the index of a variable, returns -1 if it does not exist */ 
 int get_var(char* variable);
 
@@ -300,13 +302,17 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
           fprintf(stderr, "ERROR: Line %d; .const expects argument\n", line_num);
           exit_safely(EXIT_FAILURE);
         }
+        // if last character is ']' then it is an array
+        bool is_array = false;
+        if (name[strlen(name) - 1] == ']') is_array = true;
+
+        // TODO: what about if array of values
         char* value = strtok(NULL, " ");
         if (value == NULL) {
           fprintf(stderr, "ERROR: Line %d; .const expects argument\n", line_num);
           exit_safely(EXIT_FAILURE);
         }
 
-        // TODO: what about if array of values
         
         for (int i=0; i < strlen(value); i++) {
           if (isdigit(value[i]) || 
@@ -317,7 +323,7 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
           fprintf(stderr, "ERROR: Line %d; .const expects number argument\n", line_num);
           exit_safely(EXIT_FAILURE);
         }
-        // convert value into a number and return that number
+        // convert value into a number and set var to that number
         int num_val;
         if (value[0] == '0' && (value[1] == 'x' || value[1] == 'X')) { // hex
           num_val = strtol(value, NULL, 16);
@@ -347,7 +353,7 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
   return 0;
 }
 
-int get_var(char* variable) {
+int get_var(char* variable) { // TODO: include getting var part of array
   for (int i=0; i < num_vars; i++) {
     if ( strcmp(variable, variables[i]) == 0 ) return i;
   }
