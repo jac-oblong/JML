@@ -40,7 +40,6 @@ uint8_t instruction_args[35] = {
 char** variables = NULL;
 uint16_t* var_values = NULL;
 int num_vars = 0;
-bool var_continued = false; // used when a constant goes over multiple lines
 // file file descriptors
 int fd_read;
 int fd_write;
@@ -69,13 +68,18 @@ int get_instr(char* instruction);
  * is returned */
 int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num); 
 
-// TODO: make function to set up a const array
-
 /* gets the index of a variable, returns -1 if it does not exist */ 
 int get_var(char* variable);
 
 /* sets the value of the variable, creates variable if it does not exist */ 
 void set_var(char* variable, uint16_t value);
+
+/* sets up a array of variables, expects the variable name without brackets, and
+ * the entire list of values without '{' or '}' */
+void set_var_array(char* variable, char* values);
+
+/* converts a string number into the integer value, returns -1 if not number */
+int char_to_num(char* num);
 
 /* exits the program safely, deleting all allocated memory and closing files */ 
 void exit_safely(int code);
@@ -249,28 +253,15 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
         bool is_var = false;
         if (get_var(arg1) != -1) is_var = true;
         
-        // check if numeric if not var
-        for (int i=0; i < strlen(arg1) && !is_var; i++) {
-          if (isdigit(arg1[i]) || 
-              (arg1[i] == 'x' || arg1[i] == 'X') && i == 1 || 
-              (arg1[i] == 'b' || arg1[i] == 'B') && i == 1) {
-            continue;
-          }
+        // convert arg1 into a number if not variable
+        int return_val = char_to_num(arg1);
+        if (return_val == -1 && !is_var) {
           fprintf(stderr, "ERROR: Line %d; .org expects number argument\n", line_num);
           exit_safely(EXIT_FAILURE);
         }
+        // get variable value if a variable
+        if (is_var) return_val = var_values[get_var(arg1)];
 
-        // convert arg1 into a number and return that number
-        int return_val;
-        if (is_var) { // variable, so just get the value
-          return_val = var_values[get_var(arg1)];
-        } else if (arg1[0] == '0' && (arg1[1] == 'x' || arg1[1] == 'X')) { // hex
-          return_val = strtol(arg1, NULL, 16);
-        } else if (arg1[0] == '0' && (arg1[1] == 'b' || arg1[1] == 'B')) { // binary
-          return_val = strtol(arg1, NULL, 2);
-        } else { // decimal
-          return_val = strtol(arg1, NULL, 10);
-        }
         // check for unused third command and warn about it 
         if (strtok(NULL, " ") != NULL) {
           fprintf(stderr, "WARNING: unused argument for .org on line %d\n", line_num);
@@ -306,34 +297,53 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
         bool is_array = false;
         if (name[strlen(name) - 1] == ']') is_array = true;
 
-        // TODO: what about if array of values
         char* value = strtok(NULL, " ");
         if (value == NULL) {
           fprintf(stderr, "ERROR: Line %d; .const expects argument\n", line_num);
           exit_safely(EXIT_FAILURE);
         }
 
-        
-        for (int i=0; i < strlen(value); i++) {
-          if (isdigit(value[i]) || 
-              (value[i] == 'x' || value[i] == 'X') && i == 1 || 
-              (value[i] == 'b' || value[i] == 'B') && i == 1) {
-            continue;
-          }
+        // convert value into a number and set var to that number
+        int num_val = char_to_num(value);
+        if (num_val < 0 && !is_array) {
           fprintf(stderr, "ERROR: Line %d; .const expects number argument\n", line_num);
           exit_safely(EXIT_FAILURE);
         }
-        // convert value into a number and set var to that number
-        int num_val;
-        if (value[0] == '0' && (value[1] == 'x' || value[1] == 'X')) { // hex
-          num_val = strtol(value, NULL, 16);
-        } else if (value[0] == '0' && (value[1] == 'b' || value[1] == 'B')) { // binary
-          num_val = strtol(value, NULL, 2);
-        } else { // decimal
-          num_val = strtol(value, NULL, 10);
+        
+        // either set the variable, or set the array
+        if (is_array) {
+          // strip off brackets at end of variable name
+          int i=0;
+          while (name[i] != '[' && i <= strlen(name)) i++;
+          if (i == strlen(name)) {
+            fprintf(stderr, "ERROR: Line %d; improper use of brackets\n", line_num);
+            exit_safely(EXIT_FAILURE);
+          }
+          name[i] = '\0';
+
+          // remove '{'
+          i=0;
+          while (value[i] != '{' && i <= strlen(value)) i++;
+          if (i == strlen(name)) {
+            fprintf(stderr, "ERROR: Line %d; improper use of braces\n", line_num);
+            exit_safely(EXIT_FAILURE);
+          }
+          value += i;
+          
+          // remove '}'
+          while (value[i] != '}' && i <= strlen(value)) i++;
+          if (i == strlen(name)) {
+            fprintf(stderr, "ERROR: Line %d; improper use of braces\n", line_num);
+            exit_safely(EXIT_FAILURE);
+          }
+          value[i] = '\0';
+
+          set_var_array(name, value);
+
+        } else {
+          set_var(name, num_val);
         }
 
-        set_var(name, num_val);
         // check for unused third command and warn about it 
         if (strtok(NULL, " ") != NULL) {
           fprintf(stderr, "WARNING: unused argument for .const on line %d\n", line_num);
@@ -353,7 +363,50 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
   return 0;
 }
 
-int get_var(char* variable) { // TODO: include getting var part of array
+int get_var(char* variable) { 
+  // check input for any sort of junk
+  int num_l_bracket = 0, num_r_bracket = 0;
+  for (int i=0; i < strlen(variable); i++) {
+    if (!isalpha(variable[i])) {
+      if (variable[i] == '[') {
+        num_l_bracket++;
+      } else if (variable[i] == ']') {
+        num_r_bracket++;
+      }
+      // if char is '_' make sure next char is not underscore
+      else if (variable[i] == '_' && variable[i+1] == '_') {
+        return -1;
+      } else {
+        return -1;
+      }
+    }
+  }
+  // is the variable an array
+  char working_buf[strlen(variable)+3];
+  if (variable[strlen(variable)-1] == ']') {
+    strcpy(working_buf, variable);
+    // find beginning bracket
+    int i=0;
+    while (working_buf[i] != '[' && i <= strlen(working_buf)) i++;
+    if (i == strlen(working_buf)) {
+      return -1;
+    }
+    // replace '[num]' at end of variable with __num__
+    working_buf[i] = '_';
+    i++;
+    char temp = '_';
+    while (working_buf[i] != ']') {
+      char x = working_buf[i];
+      working_buf[i] = temp;
+      temp = x;
+      i++;
+    }
+    working_buf[i] = '_';
+    working_buf[i+1] = '_';
+    working_buf[i+2] = '\0';
+    // point to edited string
+    variable = working_buf;
+  }
   for (int i=0; i < num_vars; i++) {
     if ( strcmp(variable, variables[i]) == 0 ) return i;
   }
@@ -373,6 +426,49 @@ void set_var(char* variable, uint16_t value) {
   strcpy(variables[num_vars-1], variable);
   var_values = realloc(var_values, num_vars*sizeof(uint16_t));
   var_values[num_vars-1] = value;
+}
+
+void set_var_array(char* variable, char* values) {
+  int i=0;
+  char* next_value = strtok(values, ",");
+  while (next_value != NULL) {
+    // remove leading and trailing whitespace
+    while (isspace(next_value[0])) next_value++;
+    while (isspace(next_value[strlen(next_value)-1])) next_value[strlen(next_value)-1] = '\0';
+
+    int v = char_to_num(next_value);
+    if (v == -1) return;
+    
+    char buf[strlen(variable) + 4 + 3];
+    sprintf(buf, "%s__%d__", variable, i);
+
+    set_var(buf, v);
+    
+    next_value = strtok(NULL, ",");
+  }
+}
+
+int char_to_num(char* num) {
+  // check if numeric if not var
+  for (int i=0; i < strlen(num); i++) {
+    if (isdigit(num[i]) || 
+        (num[i] == 'x' || num[i] == 'X') && i == 1 || 
+        (num[i] == 'b' || num[i] == 'B') && i == 1) {
+      continue;
+    }
+    return -1;
+  }
+
+  // convert num into a number and return that number
+  int return_val;
+  if (num[0] == '0' && (num[1] == 'x' || num[1] == 'X')) { // hex
+    return_val = strtol(num, NULL, 16);
+  } else if (num[0] == '0' && (num[1] == 'b' || num[1] == 'B')) { // binary
+    return_val = strtol(num, NULL, 2);
+  } else { // decimal
+    return_val = strtol(num, NULL, 10);
+  }
+  return return_val;
 }
 
 void exit_safely(int code) {
