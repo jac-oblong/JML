@@ -16,7 +16,7 @@ char instructions[35][7] = {
   "movlw", "retfie", "retlw", "return", "sleep", "sublw", "xorlw"
 };
 // opcode that corresponds with instruction
-uint16_t opcode[35] = {
+uint16_t instr_opcodes[35] = {
   0x0700, 0x0500, 0x0180, 0x0100, 0x0900, 0x0300, 0x0B00, 0x0A00, 0x0F00, 
   0x0400, 0x0800, 0x0080, 0x0000, 0x0D00, 0x0C00, 0x0200, 0x0E00, 0x0600, 
   0x1000, 0x1400, 0x1800, 0x1C00, 0x3E00, 0x3900, 0x2000, 0x0064, 0x2800, 
@@ -229,137 +229,306 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
 
   // get first word, will say what to do with rest of line
   char* word1 = strtok(line, " ");
-  if (word1 != NULL) {
-    // if semicolon, make end of string
-    for (int i=0; i < strlen(word1); i++) {
-      if (word1[i] == ';') {
-        word1[i] = '\0';
-        break;
-      }
+  if (word1 == NULL) return -1; // empty line
+
+  // if semicolon, make end of string
+  for (int i=0; i < strlen(word1); i++) {
+    if (word1[i] == ';') {
+      word1[i] = '\0';
+      break;
     }
-    // if length of string is zero, nothing to do anymore
-    if (strlen(word1) == 0) return -1;
-    
-    // '.org', '.label' or '.const' command
-    if (word1[0] == '.') {
-      if (strcmp(word1, ".org") == 0) { // .org
-        char* arg1 = strtok(NULL, " ");
-        if (arg1 == NULL) {
-          fprintf(stderr, "ERROR: Line %d; .org expects argument\n", line_num);
-          exit_safely(EXIT_FAILURE);
-        }
-        
-        // handle arg1 being a variable
-        bool is_var = false;
-        if (get_var(arg1) != -1) is_var = true;
-        
-        // convert arg1 into a number if not variable
-        int return_val = char_to_num(arg1);
-        if (return_val == -1 && !is_var) {
-          fprintf(stderr, "ERROR: Line %d; .org expects number argument\n", line_num);
-          exit_safely(EXIT_FAILURE);
-        }
-        // get variable value if a variable
-        if (is_var) return_val = var_values[get_var(arg1)];
-
-        // check for unused third command and warn about it 
-        if (strtok(NULL, " ") != NULL) {
-          fprintf(stderr, "WARNING: unused argument for .org on line %d\n", line_num);
-        }
-
-        return return_val;
-
-      } else if (strcmp(word1, ".label") == 0) { // .label
-        char* label = strtok(NULL, " ");
-        if (label == NULL) {
-          fprintf(stderr, "ERROR: Line %d; .label expects argument\n", line_num);
-          exit_safely(EXIT_FAILURE);
-        }
-        if (get_var(label) != -1) { // overwriting another label
-          fprintf(stderr, "WARNING: Line %d; overwriting label %s\n", line_num, label);
-        }
-        set_var(label, cur_loc);
-        
-        // check for unused third command and warn about it 
-        if (strtok(NULL, " ") != NULL) {
-          fprintf(stderr, "WARNING: unused argument for .label on line %d\n", line_num);
-        }
-
-        return -1; // no opcode given
-
-      } else { // .const
-        char* name = strtok(NULL, " ");
-        if (name == NULL) {
-          fprintf(stderr, "ERROR: Line %d; .const expects argument\n", line_num);
-          exit_safely(EXIT_FAILURE);
-        }
-        // if last character is ']' then it is an array
-        bool is_array = false;
-        if (name[strlen(name) - 1] == ']') is_array = true;
-
-        char* value = strtok(NULL, " ");
-        if (value == NULL) {
-          fprintf(stderr, "ERROR: Line %d; .const expects argument\n", line_num);
-          exit_safely(EXIT_FAILURE);
-        }
-
-        // convert value into a number and set var to that number
-        int num_val = char_to_num(value);
-        if (num_val < 0 && !is_array) {
-          fprintf(stderr, "ERROR: Line %d; .const expects number argument\n", line_num);
-          exit_safely(EXIT_FAILURE);
-        }
-        
-        // either set the variable, or set the array
-        if (is_array) {
-          // strip off brackets at end of variable name
-          int i=0;
-          while (name[i] != '[' && i <= strlen(name)) i++;
-          if (i == strlen(name)) {
-            fprintf(stderr, "ERROR: Line %d; improper use of brackets\n", line_num);
-            exit_safely(EXIT_FAILURE);
-          }
-          name[i] = '\0';
-
-          // remove '{'
-          i=0;
-          while (value[i] != '{' && i <= strlen(value)) i++;
-          if (i == strlen(name)) {
-            fprintf(stderr, "ERROR: Line %d; improper use of braces\n", line_num);
-            exit_safely(EXIT_FAILURE);
-          }
-          value += i;
-          
-          // remove '}'
-          while (value[i] != '}' && i <= strlen(value)) i++;
-          if (i == strlen(name)) {
-            fprintf(stderr, "ERROR: Line %d; improper use of braces\n", line_num);
-            exit_safely(EXIT_FAILURE);
-          }
-          value[i] = '\0';
-
-          set_var_array(name, value);
-
-        } else {
-          set_var(name, num_val);
-        }
-
-        // check for unused third command and warn about it 
-        if (strtok(NULL, " ") != NULL) {
-          fprintf(stderr, "WARNING: unused argument for .const on line %d\n", line_num);
-        }
-
-        return -1; // no opcode given
-      }
-
-    // instruction
-    } else {
-      // TODO: implement instruction
-    }
-
-  } else { // the line was all whitespace
-    return -1;
   }
+  // if length of string is zero, nothing to do anymore
+  if (strlen(word1) == 0) return -1;
+  
+  // '.org', '.label' or '.const' command
+  if (word1[0] == '.') {
+    if (strcmp(word1, ".org") == 0) { // .org
+      char* arg1 = strtok(NULL, " ");
+      if (arg1 == NULL) {
+        fprintf(stderr, "ERROR: Line %d; .org expects argument\n", line_num);
+        exit_safely(EXIT_FAILURE);
+      }
+      
+      // handle arg1 being a variable
+      bool is_var = false;
+      if (get_var(arg1) != -1) is_var = true;
+      
+      // convert arg1 into a number if not variable
+      int return_val = char_to_num(arg1);
+      if (return_val == -1 && !is_var) {
+        fprintf(stderr, "ERROR: Line %d; .org expects number argument\n", line_num);
+        exit_safely(EXIT_FAILURE);
+      }
+      // get variable value if a variable
+      if (is_var) return_val = var_values[get_var(arg1)];
+
+      // check for unused third command and warn about it 
+      if (strtok(NULL, " ") != NULL) {
+        fprintf(stderr, "WARNING: unused argument for .org on line %d\n", line_num);
+      }
+
+      return return_val;
+
+    } else if (strcmp(word1, ".label") == 0) { // .label
+      char* label = strtok(NULL, " ");
+      if (label == NULL) {
+        fprintf(stderr, "ERROR: Line %d; .label expects argument\n", line_num);
+        exit_safely(EXIT_FAILURE);
+      }
+      if (get_var(label) != -1) { // overwriting another label
+        fprintf(stderr, "WARNING: Line %d; overwriting label %s\n", line_num, label);
+      }
+      set_var(label, cur_loc);
+      
+      // check for unused third command and warn about it 
+      if (strtok(NULL, " ") != NULL) {
+        fprintf(stderr, "WARNING: unused argument for .label on line %d\n", line_num);
+      }
+
+      return -1; // no opcode given
+
+    } else { // .const
+      char* name = strtok(NULL, " ");
+      if (name == NULL) {
+        fprintf(stderr, "ERROR: Line %d; .const expects argument\n", line_num);
+        exit_safely(EXIT_FAILURE);
+      }
+      // if last character is ']' then it is an array
+      bool is_array = false;
+      if (name[strlen(name) - 1] == ']') is_array = true;
+
+      char* value = strtok(NULL, " ");
+      if (value == NULL) {
+        fprintf(stderr, "ERROR: Line %d; .const expects argument\n", line_num);
+        exit_safely(EXIT_FAILURE);
+      }
+
+      // convert value into a number and set var to that number
+      int num_val = char_to_num(value);
+      if (num_val < 0 && !is_array) {
+        fprintf(stderr, "ERROR: Line %d; .const expects number argument\n", line_num);
+        exit_safely(EXIT_FAILURE);
+      }
+      
+      // either set the variable, or set the array
+      if (is_array) {
+        // strip off brackets at end of variable name
+        int i=0;
+        while (name[i] != '[' && i <= strlen(name)) i++;
+        if (i == strlen(name)) {
+          fprintf(stderr, "ERROR: Line %d; improper use of brackets\n", line_num);
+          exit_safely(EXIT_FAILURE);
+        }
+        name[i] = '\0';
+
+        // remove '{'
+        i=0;
+        while (value[i] != '{' && i <= strlen(value)) i++;
+        if (i == strlen(name)) {
+          fprintf(stderr, "ERROR: Line %d; improper use of braces\n", line_num);
+          exit_safely(EXIT_FAILURE);
+        }
+        value += i;
+        
+        // remove '}'
+        while (value[i] != '}' && i <= strlen(value)) i++;
+        if (i == strlen(name)) {
+          fprintf(stderr, "ERROR: Line %d; improper use of braces\n", line_num);
+          exit_safely(EXIT_FAILURE);
+        }
+        value[i] = '\0';
+
+        set_var_array(name, value);
+
+      } else {
+        set_var(name, num_val);
+      }
+
+      // check for unused third command and warn about it 
+      if (strtok(NULL, " ") != NULL) {
+        fprintf(stderr, "WARNING: unused argument for .const on line %d\n", line_num);
+      }
+
+      return -1; // no opcode given
+    }
+
+  }
+
+  // instruction 
+  int index = get_instr(word1);
+  if (index == -1) {
+    fprintf(stderr, "ERROR: unrecognized instruction %s on line %d\n", word1, line_num);
+    exit_safely(EXIT_FAILURE);
+  }
+
+  *opcode = instr_opcodes[index];
+
+  // arguments for opcode 
+  if (instruction_args[index] == 0x00) {
+    // do nothing, opcode is complete
+  } else if (instruction_args[index] == 0xC0) {
+    // 0b11000000
+    // <f> argument expected
+    // <d> argument expected
+    char* f = strtok(NULL, ",");
+    char* d = strtok(NULL, "\n");
+    if (f == NULL || d == NULL) {
+      fprintf(stderr, "ERROR: line %d; instruction %s expects arguments <f>,<d>\n", line_num, word1);
+      exit_safely(EXIT_FAILURE);
+    }
+    // strip leading & lagging whitespace
+    while (isspace(f[0])) f++;
+    while (isspace(f[strlen(f)-1])) f[strlen(f)-1] = '\0';
+    while (isspace(d[0])) d++;
+    while (isspace(d[strlen(d)-1])) d[strlen(d)-1] = '\0';
+    
+    // get number value
+    int f_val = char_to_num(f);
+    int d_val = char_to_num(d);
+    // get variable value
+    int f_var_index = get_var(f);
+    int d_var_index = get_var(d);
+    if (f_val < 0 && f_var_index < 0 || d_val < 0 && d_var_index < 0) {
+      fprintf(stderr, "ERROR: line %d; instruction %s arguments not recognized\n", line_num, word1);
+      exit_safely(EXIT_FAILURE);
+    }
+
+    if (f_var_index >= 0) {
+      f_val = var_values[f_var_index];
+    }
+    if (d_var_index >= 0) {
+      d_val = var_values[d_var_index];
+    }
+    
+    // zero out upper bits of f and d
+    f_val &= 0x00000007;
+    d_val &= 0x00000001;
+    // shift d to the right spot
+    d_val = d_val << 7;
+
+    *opcode |= (uint8_t)f_val;
+    *opcode |= (uint8_t)d_val;
+
+    return 0;
+
+  } else if (instruction_args[index] == 0x80) {
+    // 0b10000000
+    // <f> argument expected
+    char* f = strtok(NULL, "\n");
+    if (f == NULL) {
+      fprintf(stderr, "ERROR: line %d; instruction %s expects argument <f>\n", line_num, word1);
+      exit_safely(EXIT_FAILURE);
+    }
+    while (isspace(f[0])) f++;
+    while (isspace(f[strlen(f)-1])) f[strlen(f)-1] = '\0';
+    
+    // get number value
+    int f_val = char_to_num(f);
+    // get variable value
+    int f_var_index = get_var(f);
+    if (f_val < 0 && f_var_index < 0) {
+      fprintf(stderr, "ERROR: line %d; instruction %s argument not recognized\n", line_num, word1);
+      exit_safely(EXIT_FAILURE);
+    }
+
+    if (f_var_index >= 0) {
+      f_val = var_values[f_var_index];
+    }
+    
+    // zero out upper bits of f
+    f_val &= 0x00000007;
+
+    *opcode |= (uint8_t)f_val;
+
+    return 0;
+
+  } else if (instruction_args[index] == 0xA0) {
+    // 0b10100000
+    // <f> argument expected
+    // <b> argument expected
+    char* f = strtok(NULL, ",");
+    char* b = strtok(NULL, "\n");
+    if (f == NULL || b == NULL) {
+      fprintf(stderr, "ERROR: line %d; instruction %s expects arguments <f>,<b>\n", line_num, word1);
+      exit_safely(EXIT_FAILURE);
+    }
+    // strip leading & lagging whitespace
+    while (isspace(f[0])) f++;
+    while (isspace(f[strlen(f)-1])) f[strlen(f)-1] = '\0';
+    while (isspace(b[0])) b++;
+    while (isspace(b[strlen(b)-1])) b[strlen(b)-1] = '\0';
+    
+    // get number value
+    int f_val = char_to_num(f);
+    int b_val = char_to_num(b);
+    // get variable value
+    int f_var_index = get_var(f);
+    int b_var_index = get_var(b);
+    if (f_val < 0 && f_var_index < 0 || b_val < 0 && b_var_index < 0) {
+      fprintf(stderr, "ERROR: line %d; instruction %s arguments not recognized\n", line_num, word1);
+      exit_safely(EXIT_FAILURE);
+    }
+
+    if (f_var_index >= 0) {
+      f_val = var_values[f_var_index];
+    }
+    if (b_var_index >= 0) {
+      b_val = var_values[b_var_index];
+    }
+    
+    // zero out upper bits of f and d
+    f_val &= 0x00000007;
+    b_val &= 0x00000003;
+    // shift b to the right spot
+    b_val = b_val << 7;
+
+    *opcode |= (uint8_t)f_val;
+    *opcode |= (uint8_t)b_val;
+
+    return 0;
+
+  } else {
+    // 0b00010000 or 0b00011000
+    // <k> argument expected
+    // shift 8 or 11 bits
+    char* k = strtok(NULL, "\n");
+    if (k == NULL) {
+      fprintf(stderr, "ERROR: line %d; instruction %s expects argument <k>\n", line_num, word1);
+      exit_safely(EXIT_FAILURE);
+    }
+    // strip leading & lagging whitespace
+    while (isspace(k[0])) k++;
+    while (isspace(k[strlen(k)-1])) k[strlen(k)-1] = '\0';
+    
+    // get number value
+    int k_val = char_to_num(k);
+    // get variable value
+    int k_var_index = get_var(k);
+    if (k_val < 0 && k_var_index < 0) {
+      fprintf(stderr, "ERROR: line %d; instruction %s arguments not recognized\n", line_num, word1);
+      exit_safely(EXIT_FAILURE);
+    }
+
+    if (k_var_index >= 0) {
+      k_val = var_values[k_var_index];
+    }
+    
+    // zero out upper bits of k
+    k_val &= 0x00000007;
+    // shift k to the right spot
+    if (instruction_args[index] == 0x10) {
+      k_val = k_val << 8;
+    } else {
+      k_val = k_val << 11;
+    } 
+
+    *opcode |= (uint8_t)k_val;
+
+    return 0;
+
+  }
+
   return 0;
 }
 
