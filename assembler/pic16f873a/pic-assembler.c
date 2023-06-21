@@ -10,10 +10,10 @@
 
 // legal instructions
 char instructions[35][7] = {
-  "addwf", "andwf", "clrf", "comf", "decf", "decfsz", "incf", "incfsz", "iorwf",
-  "movf", "movwf", "nop", "rlf", "rrf", "subwf", "swapf", "xorwf", "bcf", "bsf",
-  "btfsc", "btfss", "addlw", "andlw", "call", "clrwdt", "goto", "iorlw", 
-  "movlw", "retfie", "retlw", "return", "sleep", "sublw", "xorlw"
+  "addwf", "andwf", "clrf", "clrw", "comf", "decf", "decfsz", "incf", "incfsz", 
+  "iorwf", "movf", "movwf", "nop", "rlf", "rrf", "subwf", "swapf", "xorwf", 
+  "bcf", "bsf", "btfsc", "btfss", "addlw", "andlw", "call", "clrwdt", "goto", 
+  "iorlw", "movlw", "retfie", "retlw", "return", "sleep", "sublw", "xorlw"
 };
 // opcode that corresponds with instruction
 uint16_t instr_opcodes[35] = {
@@ -28,7 +28,7 @@ uint16_t instr_opcodes[35] = {
  * <d>        : d argument expected
  * <b>        : b argument expected
  * <k>        : k argument expected
- * <k-shift>  : how much to shift k; 0->8, 1->11
+ * <k-zero>   : how much of k to allow through; 0->8, 1->11
  * <x>        : do not care
  */
 uint8_t instruction_args[35] = {
@@ -43,6 +43,8 @@ int num_vars = 0;
 // file file descriptors
 int fd_read;
 int fd_write;
+// end of file
+bool end_of_input = false;
 // buffer used before writing to file
 uint16_t* bin_file_buffer;
 // buffer used to store line
@@ -87,9 +89,14 @@ void exit_safely(int code);
 
 int main(int argc, char** argv) {
   // default input/output conditions
-  char* input_file;
+  char* input_file = "in.s";
   char* output_file = "a.bin";
   int num_words = 0;
+
+  if (argc < 2) {
+    fprintf(stdout, "ERROR: input file name required\n");
+    exit_safely(EXIT_FAILURE);
+  }
   
   // get input options from command line arguments
   for (int i=1; i < argc; i++) {
@@ -112,8 +119,7 @@ int main(int argc, char** argv) {
       continue;
 
     } else {
-      fprintf(stdout, "ERROR: unrecognized argument \"%s\"\n", argv[i]);
-      exit_safely(EXIT_FAILURE);
+      input_file = argv[i];
     }
   }
 
@@ -125,12 +131,16 @@ int main(int argc, char** argv) {
     fprintf(stdout, "ERROR: open() file %s failed\n", input_file);
     exit_safely(EXIT_FAILURE);
   }
-  int fd_write = open(output_file, O_CREAT | O_EXCL | O_WRONLY);
+  int fd_write = open(output_file, O_CREAT | O_WRONLY, 0666);
   if (fd_write < 0) {
     perror(NULL);
     fprintf(stdout, "ERROR: open() file %s failed\n", output_file);
     exit_safely(EXIT_FAILURE);
   }
+
+  #ifdef DEBUG_MODE
+  printf("files opened\n");
+  #endif
 
   // file buffer (used because we want to navigate to certian locations)
   bin_file_buffer = (uint16_t*)calloc(num_words, sizeof(uint16_t));
@@ -141,7 +151,11 @@ int main(int argc, char** argv) {
   int line_num = 1; // useful for errors
   line = (char*)calloc(10, sizeof(char));
   // parse the input line by line and write to output buffer 
-  while (read_line(fd_read, line) != 0) {
+  end_of_input = read_line(fd_read, line) == 0;
+  while ((strlen(line) != 0 || !end_of_input) && strcmp(line, "a") != 0) {
+    #ifdef DEBUG_MODE
+    printf("current line: %d\n", line_num);
+    #endif
     uint16_t opcode;
     int rc = parse_line(line, &opcode, cur_file_buf_loc, line_num);
     // change file location because used '.org'
@@ -173,9 +187,13 @@ int main(int argc, char** argv) {
     }
     // write opcode
     bin_file_buffer[cur_file_buf_loc] = opcode;
+    #ifdef DEBUG_MODE
+    printf("wrote opcode %d to location %ld\n", opcode, cur_file_buf_loc);
+    #endif
     
     cur_file_buf_loc++;
     line_num++;
+    end_of_input = read_line(fd_read, line) == 0;
   }
 
   int rc = write(fd_write, bin_file_buffer, num_words*2);
@@ -187,6 +205,9 @@ int main(int argc, char** argv) {
     fprintf(stderr, "WARNING: failed to write entire buffer, %d bytes written.\n", rc);
     exit_safely(EXIT_FAILURE);
   }
+  #ifdef DEBUG_MODE
+  printf("wrote to file\n");
+  #endif
 
   exit_safely(EXIT_SUCCESS);
 }
@@ -224,26 +245,33 @@ int get_instr(char* instruction) {
 }
 
 int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
+  #ifdef DEBUG_MODE
+  printf("parsing line: %s\n", line);
+  #endif
   // remove leading whitespace
   while (isspace(line[0])) line++;
-
-  // get first word, will say what to do with rest of line
-  char* word1 = strtok(line, " ");
-  if (word1 == NULL) return -1; // empty line
-
+  
   // if semicolon, make end of string
-  for (int i=0; i < strlen(word1); i++) {
-    if (word1[i] == ';') {
-      word1[i] = '\0';
+  for (int i=0; i < strlen(line); i++) {
+    if (line[i] == ';') {
+      line[i] = '\0';
       break;
     }
   }
-  // if length of string is zero, nothing to do anymore
-  if (strlen(word1) == 0) return -1;
   
+  // get first word, will say what to do with rest of line
+  char* word1 = strtok(line, " ");
+  if (word1 == NULL) return -1; // empty line
+  #ifdef DEBUG_MODE
+  printf("first word: %s\n", word1);
+  #endif
+
   // '.org', '.label' or '.const' command
   if (word1[0] == '.') {
     if (strcmp(word1, ".org") == 0) { // .org
+      #ifdef DEBUG_MODE
+      printf(".org found\n");
+      #endif
       char* arg1 = strtok(NULL, " ");
       if (arg1 == NULL) {
         fprintf(stderr, "ERROR: Line %d; .org expects argument\n", line_num);
@@ -271,6 +299,9 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
       return return_val;
 
     } else if (strcmp(word1, ".label") == 0) { // .label
+      #ifdef DEBUG_MODE
+      printf(".label found\n");
+      #endif
       char* label = strtok(NULL, " ");
       if (label == NULL) {
         fprintf(stderr, "ERROR: Line %d; .label expects argument\n", line_num);
@@ -288,7 +319,10 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
 
       return -1; // no opcode given
 
-    } else { // .const
+    } else if (strcmp(word1, ".const") == 0) { // .const
+      #ifdef DEBUG_MODE
+      printf(".const found\n");
+      #endif
       char* name = strtok(NULL, " ");
       if (name == NULL) {
         fprintf(stderr, "ERROR: Line %d; .const expects argument\n", line_num);
@@ -351,26 +385,41 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
       }
 
       return -1; // no opcode given
+    } else {
+      fprintf(stderr, "ERROR: Line %d; command %s not recognized\n", line_num, word1);
+      exit_safely(EXIT_FAILURE);
     }
 
   }
 
   // instruction 
+  #ifdef DEBUG_MODE
+  printf("instruction found\n");
+  #endif
   int index = get_instr(word1);
   if (index == -1) {
     fprintf(stderr, "ERROR: unrecognized instruction %s on line %d\n", word1, line_num);
     exit_safely(EXIT_FAILURE);
   }
+  #ifdef DEBUG_MODE
+  printf("instruction index: %d\n", index);
+  #endif
 
   *opcode = instr_opcodes[index];
 
   // arguments for opcode 
   if (instruction_args[index] == 0x00) {
     // do nothing, opcode is complete
+    #ifdef DEBUG_MODE
+    printf("instruction args: 0x00\n");
+    #endif
   } else if (instruction_args[index] == 0xC0) {
     // 0b11000000
     // <f> argument expected
     // <d> argument expected
+    #ifdef DEBUG_MODE
+    printf("instruction args: 0xC0\n");
+    #endif
     char* f = strtok(NULL, ",");
     char* d = strtok(NULL, "\n");
     if (f == NULL || d == NULL) {
@@ -389,7 +438,7 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
     // get variable value
     int f_var_index = get_var(f);
     int d_var_index = get_var(d);
-    if (f_val < 0 && f_var_index < 0 || d_val < 0 && d_var_index < 0) {
+    if ((f_val < 0 && f_var_index < 0) || (d_val < 0 && d_var_index < 0)) {
       fprintf(stderr, "ERROR: line %d; instruction %s arguments not recognized\n", line_num, word1);
       exit_safely(EXIT_FAILURE);
     }
@@ -400,6 +449,10 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
     if (d_var_index >= 0) {
       d_val = var_values[d_var_index];
     }
+
+    #ifdef DEBUG_MODE
+    printf("arg f: %d, arg d: %d\n", f_val, d_val);
+    #endif
     
     // zero out upper bits of f and d
     f_val &= 0x00000007;
@@ -407,14 +460,17 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
     // shift d to the right spot
     d_val = d_val << 7;
 
-    *opcode |= (uint8_t)f_val;
-    *opcode |= (uint8_t)d_val;
+    *opcode |= (uint16_t)f_val;
+    *opcode |= (uint16_t)d_val;
 
     return 0;
 
   } else if (instruction_args[index] == 0x80) {
     // 0b10000000
     // <f> argument expected
+    #ifdef DEBUG_MODE
+    printf("instruction args: 0x80\n");
+    #endif
     char* f = strtok(NULL, "\n");
     if (f == NULL) {
       fprintf(stderr, "ERROR: line %d; instruction %s expects argument <f>\n", line_num, word1);
@@ -436,10 +492,14 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
       f_val = var_values[f_var_index];
     }
     
+    #ifdef DEBUG_MODE
+    printf("arg f: %d\n", f_val);
+    #endif
+    
     // zero out upper bits of f
     f_val &= 0x00000007;
 
-    *opcode |= (uint8_t)f_val;
+    *opcode |= (uint16_t)f_val;
 
     return 0;
 
@@ -447,6 +507,9 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
     // 0b10100000
     // <f> argument expected
     // <b> argument expected
+    #ifdef DEBUG_MODE
+    printf("instruction args: 0xA0\n");
+    #endif
     char* f = strtok(NULL, ",");
     char* b = strtok(NULL, "\n");
     if (f == NULL || b == NULL) {
@@ -465,7 +528,7 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
     // get variable value
     int f_var_index = get_var(f);
     int b_var_index = get_var(b);
-    if (f_val < 0 && f_var_index < 0 || b_val < 0 && b_var_index < 0) {
+    if ((f_val < 0 && f_var_index < 0) || (b_val < 0 && b_var_index < 0)) {
       fprintf(stderr, "ERROR: line %d; instruction %s arguments not recognized\n", line_num, word1);
       exit_safely(EXIT_FAILURE);
     }
@@ -476,15 +539,19 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
     if (b_var_index >= 0) {
       b_val = var_values[b_var_index];
     }
-    
+   
+    #ifdef DEBUG_MODE
+    printf("arg f: %d, arg b: %d\n", f_val, b_val);
+    #endif
+
     // zero out upper bits of f and d
     f_val &= 0x00000007;
     b_val &= 0x00000003;
     // shift b to the right spot
     b_val = b_val << 7;
 
-    *opcode |= (uint8_t)f_val;
-    *opcode |= (uint8_t)b_val;
+    *opcode |= (uint16_t)f_val;
+    *opcode |= (uint16_t)b_val;
 
     return 0;
 
@@ -492,6 +559,9 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
     // 0b00010000 or 0b00011000
     // <k> argument expected
     // shift 8 or 11 bits
+    #ifdef DEBUG_MODE
+    printf("instruction args: 0x10 or 0x18\n");
+    #endif
     char* k = strtok(NULL, "\n");
     if (k == NULL) {
       fprintf(stderr, "ERROR: line %d; instruction %s expects argument <k>\n", line_num, word1);
@@ -513,17 +583,19 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
     if (k_var_index >= 0) {
       k_val = var_values[k_var_index];
     }
-    
+   
+    #ifdef DEBUG_MODE
+    printf("arg k: %d\n", k_val);
+    #endif
+
     // zero out upper bits of k
-    k_val &= 0x00000007;
-    // shift k to the right spot
     if (instruction_args[index] == 0x10) {
-      k_val = k_val << 8;
+      k_val &= 0x00000007;
     } else {
-      k_val = k_val << 11;
+      k_val &= 0x0000000B;
     } 
 
-    *opcode |= (uint8_t)k_val;
+    *opcode |= (uint16_t)k_val;
 
     return 0;
 
@@ -621,8 +693,8 @@ int char_to_num(char* num) {
   // check if numeric if not var
   for (int i=0; i < strlen(num); i++) {
     if (isdigit(num[i]) || 
-        (num[i] == 'x' || num[i] == 'X') && i == 1 || 
-        (num[i] == 'b' || num[i] == 'B') && i == 1) {
+        ((num[i] == 'x' || num[i] == 'X') && i == 1) || 
+        ((num[i] == 'b' || num[i] == 'B') && i == 1)) {
       continue;
     }
     return -1;
