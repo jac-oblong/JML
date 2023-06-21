@@ -1,0 +1,3 @@
+programs/**
+!programs/README.md
+**/*.out
