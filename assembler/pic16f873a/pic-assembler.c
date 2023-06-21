@@ -101,11 +101,17 @@ int main(int argc, char** argv) {
   // get input options from command line arguments
   for (int i=1; i < argc; i++) {
     if ( strcmp(argv[i], "-o") == 0 ) {
+      #ifdef DEBUG_MODE
+      printf("changing output file\n");
+      #endif
       i++; // go to next argument
       output_file = argv[i];
       continue;
 
     } else if ( strcmp(argv[i], "-s") == 0 ) {
+      #ifdef DEBUG_MODE
+      printf("changing output file size\n");
+      #endif
       i++; // go to next argument
       bool is_num;
       for (int j=0; j < strlen(argv[i]); j++) {
@@ -119,6 +125,9 @@ int main(int argc, char** argv) {
       continue;
 
     } else {
+      #ifdef DEBUG_MODE
+      printf("changing input file\n");
+      #endif
       input_file = argv[i];
     }
   }
@@ -170,16 +179,19 @@ int main(int argc, char** argv) {
     }
     // writing outside the bounds of the specified file size
     if (cur_file_buf_loc >= num_words && num_words != 0) {
-      fprintf(stderr, "WARNING: attempted to write outside of file boundaries\n LINE NUMBER: %d", line_num);
-      line_num++;
-      continue;
+      fprintf(stderr, "ERROR: attempted to write outside of file boundaries\nLINE NUMBER: %d\n", line_num);
+      #ifdef DEBUG_MODE
+      printf("number of words allowed: %d\n", num_words);
+      #endif
+      exit_safely(EXIT_FAILURE);
     }
     // need to alloc more memory because no size specified
     if (num_words == 0 && cur_file_buf_loc >= buf_size) {
       bin_file_buffer = realloc(bin_file_buffer, (cur_file_buf_loc+1)*sizeof(uint16_t));
-      for (; num_words < cur_file_buf_loc+1; num_words++) {
-        bin_file_buffer[num_words-1] = 0x0000;
+      for (; buf_size < cur_file_buf_loc+1; buf_size++) {
+        bin_file_buffer[buf_size-1] = 0x0000;
       }
+      buf_size++; // make buf_size match cur_file_buf_loc+1
     }
     // overwritting data
     if (bin_file_buffer[cur_file_buf_loc] != 0) {
@@ -202,7 +214,7 @@ int main(int argc, char** argv) {
     exit_safely(EXIT_FAILURE);
   }
   if (rc != num_words*2) {
-    fprintf(stderr, "WARNING: failed to write entire buffer, %d bytes written.\n", rc);
+    fprintf(stderr, "ERROR: failed to write entire buffer, %d bytes written.\n", rc);
     exit_safely(EXIT_FAILURE);
   }
   #ifdef DEBUG_MODE
@@ -227,10 +239,14 @@ int read_line(int fd, char* buf) {
     
     if (buf[len-1] == '\n') break;
   } while (rc != 0);
-  
-  // add null char to end
-  buf = realloc(buf, len+1);
-  buf[len] = '\0';
+
+  if (rc != 0) {
+    // add null char to end
+    buf = realloc(buf, len+1);
+    buf[len] = '\0';
+  } else {
+    buf[0] = '\0'; // end of file
+  }
 
   return rc;
 }
@@ -396,6 +412,11 @@ int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
   #ifdef DEBUG_MODE
   printf("instruction found\n");
   #endif
+  
+  // strip leading and lagging whitespace
+  while (isspace(word1[0])) word1++;
+  while (isspace(word1[strlen(word1)-1])) word1[strlen(word1)-1] = '\0';
+
   int index = get_instr(word1);
   if (index == -1) {
     fprintf(stderr, "ERROR: unrecognized instruction %s on line %d\n", word1, line_num);

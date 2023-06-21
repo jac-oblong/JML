@@ -1,3 +1,4 @@
 programs/**
 !programs/README.md
 **/*.out
+**/*.bin
