@@ -154,7 +154,7 @@ int main(int argc, char** argv) {
   end_of_input = read_line(fd_read, line) == 0;
   while ((strlen(line) != 0 || !end_of_input) && strcmp(line, "a") != 0) {
     #ifdef DEBUG_MODE
-    printf("current line: %d\n", line_num);
+    printf("\n\n\ncurrent line: %d\n", line_num);
     #endif
     uint16_t opcode;
     int rc = parse_line(line, &opcode, cur_file_buf_loc, line_num);
@@ -225,7 +225,7 @@ int read_line(int fd, char* buf) {
     }
     len++;
     
-    if (buf[len] == '\n') break;
+    if (buf[len-1] == '\n') break;
   } while (rc != 0);
   
   // add null char to end
