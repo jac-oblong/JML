@@ -7,14 +7,14 @@
 
 
 // legal instructions
-char instructions[35][7] = {
+const char instructions[35][7] = {
   "addwf", "andwf", "clrf", "clrw", "comf", "decf", "decfsz", "incf", "incfsz", 
   "iorwf", "movf", "movwf", "nop", "rlf", "rrf", "subwf", "swapf", "xorwf", 
   "bcf", "bsf", "btfsc", "btfss", "addlw", "andlw", "call", "clrwdt", "goto", 
   "iorlw", "movlw", "retfie", "retlw", "return", "sleep", "sublw", "xorlw"
 };
 // opcode that corresponds with instruction
-uint16_t instr_opcodes[35] = {
+const uint16_t instr_opcodes[35] = {
   0x0700, 0x0500, 0x0180, 0x0100, 0x0900, 0x0300, 0x0B00, 0x0A00, 0x0F00, 
   0x0400, 0x0800, 0x0080, 0x0000, 0x0D00, 0x0C00, 0x0200, 0x0E00, 0x0600, 
   0x1000, 0x1400, 0x1800, 0x1C00, 0x3E00, 0x3900, 0x2000, 0x0064, 0x2800, 
@@ -29,7 +29,7 @@ uint16_t instr_opcodes[35] = {
  * <k-zero>   : how much of k to allow through; 0->8, 1->11
  * <x>        : do not care
  */
-uint8_t instruction_args[35] = {
+const uint8_t instruction_args[35] = {
   0xC0, 0xC0, 0x80, 0x00, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0x80, 0x00,
   0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xA0, 0xA0, 0xA0, 0xA0, 0x10, 0x10, 0x18, 0x00,
   0x18, 0x10, 0x10, 0x00, 0x10, 0x00, 0x00, 0x10, 0x10
@@ -38,21 +38,25 @@ uint8_t instruction_args[35] = {
 char** variables = NULL;
 uint16_t* var_values = NULL;
 int num_vars = 0;
+
 // file file descriptors
-FILE* f_read;
-FILE* f_write;
+FILE* f_read = NULL;
+FILE* f_write = NULL;
 // buffer used to store line
-char* line;
+char* line = NULL;
+
+// is the size of the file set and what size
+bool size_set = false;
+int f_size = 0;
+
+// current opcode
+uint16_t opcode = 0;
 
 
-/* reads a single line from the file specified 
+/* parses the command line arguments and sets the appropriate flags
  *
- * the contents of the line will be stored in 'buf', which is expected to be 
- * pointing to heap data so that it can be realloc'd to the proper size, there
- * is no size requirement for 'buf'
- *
- * returns 0 if file is ended, returns any other number otherwise */
-int read_line(int fd, char* buf); 
+ * also opens the correct files */
+void parse_command_line_args(int argc, char** argv);
 
 /* finds instruction index, returns -1 if not valid instruction */
 int get_instr(char* instruction); 
@@ -62,7 +66,31 @@ int get_instr(char* instruction);
  * if a change in location is necessary (.org for example) the new location will
  * be returned, if no operation occurs, the number will be negative, otherwise 0
  * is returned */
-int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num); 
+void parse_line(); 
+
+/* handles all necessary changes when encountering .org 
+ *
+ * this includes changing the current location in the write file */
+void handle_org();
+
+/* handles all necessary changes when encountering .const 
+ *
+ * this includes creating a variable with the right value */
+void handle_const();
+
+/* handles all necessary changes when encountering .label 
+ * 
+ * this includes creating a constant that has the same value as the current
+ * location in the write file */
+void handle_label();
+
+/* handles all necessary changes when encountering an instruction
+ *
+ * this includes forming the opcode, and writing it to the file */
+void handle_instruction();
+
+/* this function will write the current opcode to the output file */
+void write_to_file();
 
 /* gets the index of a variable, returns -1 if it does not exist */ 
 int get_var(char* variable);
@@ -82,10 +110,13 @@ void exit_safely(int code);
 
 
 int main(int argc, char** argv) {
+  parse_command_line_args(argc, argv);
+}
+
+void parse_command_line_args(int argc, char** argv) {
   // default input/output conditions
   char* input_file = "in.s";
   char* output_file = "a.bin";
-  int num_words = 0;
 
   if (argc < 2) {
     fprintf(stdout, "ERROR: input file name required\n");
@@ -107,15 +138,8 @@ int main(int argc, char** argv) {
       printf("changing output file size\n");
       #endif
       i++; // go to next argument
-      bool is_num;
-      for (int j=0; j < strlen(argv[i]); j++) {
-        if (!isdigit(argv[i][j])) is_num = false;
-      }
-      if (!is_num) {
-        fprintf(stdout, "ERROR: illegal argument for option \"-s\": %s\n", argv[i+1]);
-        exit_safely(EXIT_FAILURE);
-      }
-      num_words = atoi(argv[i]);
+      size_set = true;
+      f_size = char_to_num(argv[i]);
       continue;
 
     } else {
@@ -126,122 +150,12 @@ int main(int argc, char** argv) {
     }
   }
 
-
-  // open input & output files
-  int fd_read = open(input_file, O_RDONLY);
-  if (fd_read < 0) {
-    perror(NULL);
-    fprintf(stdout, "ERROR: open() file %s failed\n", input_file);
-    exit_safely(EXIT_FAILURE);
+  f_read = fopen(input_file, "r"); // read mode
+  f_write = fopen(output_file, "wb"); // binary write mode
+  if (f_read == NULL || f_write == NULL) {
+    perror("fopen() failed\n");
+    exit(EXIT_FAILURE);
   }
-  int fd_write = open(output_file, O_CREAT | O_WRONLY, 0666);
-  if (fd_write < 0) {
-    perror(NULL);
-    fprintf(stdout, "ERROR: open() file %s failed\n", output_file);
-    exit_safely(EXIT_FAILURE);
-  }
-
-  #ifdef DEBUG_MODE
-  printf("files opened\n");
-  #endif
-
-  // file buffer (used because we want to navigate to certian locations)
-  bin_file_buffer = (uint16_t*)calloc(num_words, sizeof(uint16_t));
-  // size of buffer
-  uint64_t buf_size = num_words;
-  // current location in buffer
-  uint64_t cur_file_buf_loc = 0;
-  int line_num = 1; // useful for errors
-  line = (char*)calloc(10, sizeof(char));
-  // parse the input line by line and write to output buffer 
-  end_of_input = read_line(fd_read, line) == 0;
-  while ((strlen(line) != 0 || !end_of_input) && strcmp(line, "a") != 0) {
-    #ifdef DEBUG_MODE
-    printf("\n\n\ncurrent line: %d\n", line_num);
-    #endif
-    uint16_t opcode;
-    int rc = parse_line(line, &opcode, cur_file_buf_loc, line_num);
-    // change file location because used '.org'
-    if (rc > 0) {
-      cur_file_buf_loc = rc;       
-      continue;
-    }
-    // no operation occurs (blank line or comment)
-    if (rc < 0) {
-      line_num++;
-      continue;
-    }
-    // writing outside the bounds of the specified file size
-    if (cur_file_buf_loc >= num_words && num_words != 0) {
-      fprintf(stderr, "ERROR: attempted to write outside of file boundaries\nLINE NUMBER: %d\n", line_num);
-      #ifdef DEBUG_MODE
-      printf("number of words allowed: %d\n", num_words);
-      #endif
-      exit_safely(EXIT_FAILURE);
-    }
-    // need to alloc more memory because no size specified
-    if (num_words == 0 && cur_file_buf_loc >= buf_size) {
-      bin_file_buffer = realloc(bin_file_buffer, (cur_file_buf_loc+1)*sizeof(uint16_t));
-      for (; buf_size < cur_file_buf_loc+1; buf_size++) {
-        bin_file_buffer[buf_size] = 0x0000;
-      }
-      buf_size++; // make buf_size match cur_file_buf_loc+1
-    }
-    // write opcode
-    bin_file_buffer[cur_file_buf_loc] = opcode;
-    #ifdef DEBUG_MODE
-    printf("wrote opcode %d to location %ld\n", opcode, cur_file_buf_loc);
-    #endif
-    
-    cur_file_buf_loc++;
-    line_num++;
-    end_of_input = read_line(fd_read, line) == 0;
-  }
-
-  // make sure num_words matches size of buffer
-  num_words = buf_size;
-
-  int rc = write(fd_write, bin_file_buffer, num_words*2);
-  if (rc < 0) {
-    perror("ERROR: failed to write to output file\n");
-    exit_safely(EXIT_FAILURE);
-  }
-  if (rc != num_words*2) {
-    fprintf(stderr, "ERROR: failed to write entire buffer, %d bytes written.\n", rc);
-    exit_safely(EXIT_FAILURE);
-  }
-  #ifdef DEBUG_MODE
-  printf("wrote to file\n");
-  #endif
-
-  exit_safely(EXIT_SUCCESS);
-}
-
-int read_line(int fd, char* buf) {
-  // read from file one byte at time
-  int len = 0;
-  int rc;
-  do {
-    buf = realloc(buf, len+1);
-    rc = read(fd, buf + len, 1);
-    if (rc < 0) {
-      perror("ERROR: read() failed\n");
-      exit_safely(EXIT_FAILURE);
-    }
-    len++;
-    
-    if (buf[len-1] == '\n') break;
-  } while (rc != 0);
-
-  if (rc != 0) {
-    // add null char to end
-    buf = realloc(buf, len+1);
-    buf[len] = '\0';
-  } else {
-    buf[0] = '\0'; // end of file
-  }
-
-  return rc;
 }
 
 int get_instr(char* instruction) {
@@ -253,7 +167,23 @@ int get_instr(char* instruction) {
   return -1;
 }
 
-int parse_line(char* line, uint16_t* opcode, uint64_t cur_loc, int line_num) {
+void parse_line() {
+}
+
+void handle_org() {
+
+}
+
+void handle_const() {
+
+}
+
+void handle_label() {
+
+}
+
+void handle_instruction() {
+
 }
 
 int get_var(char* variable) { 
