@@ -189,13 +189,9 @@ int main(int argc, char** argv) {
     if (num_words == 0 && cur_file_buf_loc >= buf_size) {
       bin_file_buffer = realloc(bin_file_buffer, (cur_file_buf_loc+1)*sizeof(uint16_t));
       for (; buf_size < cur_file_buf_loc+1; buf_size++) {
-        bin_file_buffer[buf_size-1] = 0x0000;
+        bin_file_buffer[buf_size] = 0x0000;
       }
       buf_size++; // make buf_size match cur_file_buf_loc+1
-    }
-    // overwritting data
-    if (bin_file_buffer[cur_file_buf_loc] != 0) {
-      fprintf(stderr, "WARNING: potentially overwriting already written data on line %d\n", line_num);
     }
     // write opcode
     bin_file_buffer[cur_file_buf_loc] = opcode;
@@ -207,6 +203,9 @@ int main(int argc, char** argv) {
     line_num++;
     end_of_input = read_line(fd_read, line) == 0;
   }
+
+  // make sure num_words matches size of buffer
+  num_words = buf_size;
 
   int rc = write(fd_write, bin_file_buffer, num_words*2);
   if (rc < 0) {
