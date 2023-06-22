@@ -76,11 +76,10 @@ Constants are restricted to numerical values, but the value is terminated by a
 newline or comment. The size is also restricted to 16 bits.
 
 Constants can hold more than one value by using brackets. `.const 
-CONSTANT_ARRAY[5] {0x00, 0x01, 0x02, 0x03, 0x04}` will "store" the 5 values in 
+CONSTANT_ARRAY[] {0x00, 0x01, 0x02, 0x03, 0x04}` will "store" the 5 values in 
 `CONSTANT_ARRAY`. These values can then be retrieved by using 
 `CONSTANT_ARRAY[1]`, which would return `0x01`. Constant arrays can NOT occur 
-over  multiple lines. Constant arrays no not need to specify their length, but
-it is good practice to do so.
+over  multiple lines.
 
 #### Commments
 Semicolons are used to comment the rest of the line. Example: `addlw 0x08 ; add
