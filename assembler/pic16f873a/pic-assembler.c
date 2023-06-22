@@ -460,7 +460,7 @@ int get_var(char* variable) {
   // check input for any sort of junk
   int num_l_bracket = 0, num_r_bracket = 0;
   for (int i=0; i < strlen(variable); i++) {
-    if (!isalpha(variable[i])) {
+    if (!isalpha(variable[i]) && !isdigit(variable[i])) {
       if (variable[i] == '[') {
         num_l_bracket++;
       } else if (variable[i] == ']') {
@@ -477,6 +477,9 @@ int get_var(char* variable) {
   // is the variable an array
   char working_buf[strlen(variable)+3];
   if (variable[strlen(variable)-1] == ']') {
+    #ifdef DEBUG_MODE_CONST_ARRAY
+    printf("fetching variable %s...", variable);
+    #endif
     strcpy(working_buf, variable);
     // find beginning bracket
     int i=0;
@@ -499,9 +502,18 @@ int get_var(char* variable) {
     working_buf[i+2] = '\0';
     // point to edited string
     variable = working_buf;
+    #ifdef DEBUG_MODE_CONST_ARRAY
+    printf("converted into %s\n", variable);
+    #endif
   }
+  
   for (int i=0; i < num_vars; i++) {
-    if ( strcmp(variable, variables[i]) == 0 ) return i;
+    if ( strcmp(variable, variables[i]) == 0 ) {
+      #ifdef DEBUG_MODE_CONST_ARRAY
+      printf("found %s at index %d; has value %d\n", variable, i, var_values[i]);
+      #endif
+      return i;
+    }
   }
   return -1;
 }
@@ -522,6 +534,9 @@ void set_var(char* variable, uint16_t value) {
 }
 
 void set_var_array(char* variable, char* values) {
+  #ifdef DEBUG_MODE_CONST_ARRAY
+  printf("called set_var_array( %s , %s )\n", variable, values);
+  #endif
   int i=0;
   char* next_value = strtok(values, ",");
   while (next_value != NULL) {
@@ -537,15 +552,20 @@ void set_var_array(char* variable, char* values) {
     
     int num_digits = 0, i_copy = i;
     while (i_copy != 0) {
-      i_copy %= 10;
+      i_copy /= 10;
       num_digits++;
     }
 
-    char buf[strlen(variable) + 4 + num_digits];
+    char buf[strlen(variable) + 5 + num_digits];
     sprintf(buf, "%s__%d__", variable, i);
 
+    #ifdef DEBUG_MODE_CONST_ARRAY
+    printf("setting var %s to value %d\n", buf, v);
+    #endif
+
     set_var(buf, v);
-    
+
+    i++;    
     next_value = strtok(NULL, ",");
   }
 }
