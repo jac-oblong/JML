@@ -244,7 +244,58 @@ void handle_org(char* loc) {
 }
 
 void handle_const(char* var, char* val) {
-  // TODO: Handle constants
+  if (var == NULL || val == NULL) {
+    fprintf(stderr, "ERROR: Line %d; .const expects arguments\n", line_num);
+    exit_safely(EXIT_FAILURE);
+  }
+
+  // remove whitespace from val (var's whitespace has already been removed)
+  while (isspace(val[0])) val++;
+  while (isspace(val[strlen(val)-1])) val[strlen(val)-1] = '\0';
+
+  // handle var being an array
+  if (var[strlen(var)-1] == ']') {
+    // go to right after { in val 
+    while (val[0] != '{' && strlen(val) != 0) val++;
+    // check if '{' was not found
+    if (strlen(val) == 0) {
+      fprintf(stderr, "ERROR: Line %d; array expected, but '{' not found\n", line_num);
+      exit_safely(EXIT_FAILURE);
+    }
+    val++;
+
+    // remove '}' from end of val
+    while (val[strlen(val)-1] != '}' && strlen(val) != 0) val[strlen(val)-1] = '\0';
+    // check if '}' not found
+    if (strlen(val) == 0) {
+      fprintf(stderr, "ERROR: Line %d; array expected, but '}' not found\n", line_num);
+      exit_safely(EXIT_FAILURE);
+    }
+    val[strlen(val)-1] = '\0';
+
+    // remove '[' and ']' from var, this can be done by ending string at '['
+    int i;
+    for (i=0; i < strlen(var); i++) {
+      if (var[i] == '[') var[i] = '\0';
+    }
+    // if i == strlen(var) then the '[' was not found
+    if (i == strlen(var)) {
+      fprintf(stderr, "ERROR: Line %d; array expected, but '[' not found\n", line_num);
+      exit_safely(EXIT_FAILURE);
+    }
+
+    set_var_array(var, val);
+
+  } else {
+    // try to convert value to number
+    int val_value = char_to_num(val);
+    if (val_value < 0) {
+      fprintf(stderr, "ERROR: Line %d; number value expected for .const\n", line_num);
+      exit_safely(EXIT_FAILURE);
+    }
+
+    set_var(var, val_value);
+  }
 }
 
 void handle_label(char* lab) {
@@ -455,9 +506,18 @@ void set_var_array(char* variable, char* values) {
     while (isspace(next_value[strlen(next_value)-1])) next_value[strlen(next_value)-1] = '\0';
 
     int v = char_to_num(next_value);
-    if (v == -1) return;
+    if (v == -1) {
+      fprintf(stderr, "ERROR: Line: %d; value not recognized\n", line_num);
+      exit_safely(EXIT_FAILURE);
+    }
     
-    char buf[strlen(variable) + 4 + 3];
+    int num_digits = 0, i_copy = i;
+    while (i != 0) {
+      i %= 10;
+      num_digits++;
+    }
+
+    char buf[strlen(variable) + 4 + num_digits];
     sprintf(buf, "%s__%d__", variable, i);
 
     set_var(buf, v);
