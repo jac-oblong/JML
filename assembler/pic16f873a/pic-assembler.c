@@ -199,9 +199,14 @@ void parse_line() {
   for (int i=0; i < strlen(line); i++) {
     if (line[i] == ';') line[i] = '\0';
   }
+
+  // remove all whitespace from line in order to determine if empty
+  char* line_cpy = line;
+  while (isspace(line_cpy[0])) line_cpy++;
+  while (isspace(line_cpy[strlen(line_cpy)-1])) line_cpy[strlen(line_cpy)-1] = '\0';
+  if (strlen(line_cpy) == 0) return; // line is empty
   
   char* first = strtok(line, " ");
-  if (first == NULL) return; // line is empty
   
   // .org, .const, or .label
   if (first[0] == '.') {
