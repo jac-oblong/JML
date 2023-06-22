@@ -556,9 +556,9 @@ int char_to_num(char* num) {
   // convert num into a number and return that number
   int return_val;
   if (num[0] == '0' && (num[1] == 'x' || num[1] == 'X')) { // hex
-    return_val = strtol(num, NULL, 16);
+    return_val = strtol(num+2, NULL, 16);
   } else if (num[0] == '0' && (num[1] == 'b' || num[1] == 'B')) { // binary
-    return_val = strtol(num, NULL, 2);
+    return_val = strtol(num+2, NULL, 2);
   } else { // decimal
     return_val = strtol(num, NULL, 10);
   }
