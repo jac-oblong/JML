@@ -92,6 +92,11 @@ void handle_label(char* lab);
  * this includes forming the opcode, and writing it to the file */
 void handle_instruction(char* instr);
 
+/* converts an argument into its corresponding values
+ *
+ * handles both constants and number literals */
+uint16_t parse_instr_arg(char* arg);
+
 /* gets the index of a variable, returns -1 if it does not exist */ 
 int get_var(char* variable);
 
@@ -222,19 +227,13 @@ void parse_line() {
 }
 
 void handle_org(char* loc) {
-  // try converting straight to number
-  int x = char_to_num(loc);
-  // try finding variable
-  int i = get_var(loc);
+  // convert loc to value
+  int x = parse_instr_arg(loc);
+
   // if neither number nor variable, error
-  if (x < 0 && i < 0) {
+  if (x < 0) {
     fprintf(stderr, "ERROR: Line %d; .org expects number argument\n", line_num);
     exit_safely(EXIT_FAILURE);
-  }
-  
-  // if variable, get value
-  if (i > 0) {
-    x = var_values[i];
   }
   
   // go to correct location
@@ -290,21 +289,51 @@ void handle_instruction(char* instr) {
     if (arg1 == NULL) {
       fprintf(stderr, "ERROR: Line %d; '%s' expects args\n", line_num, instr);
     }
-    // TODO: Handle getting <f> arg
+  
+    // parse <f> instr
+    uint8_t f_val = parse_instr_arg(arg1);
+    if (f_val < 0) {
+      fprintf(stderr, "ERROR: Line %d; <f> argument unrecognized\n", line_num);
+      exit_safely(EXIT_FAILURE);
+    }
 
-
+    // write <f> to opcode (first zero all irrelevent bits)
+    f_val &= 0x7F; // 0b01111111
+    opcode |= f_val;
 
     if ((instr_args & 0x40) != 0) { // <d> argument expected
       if (arg2 == NULL) {
         fprintf(stderr, "ERROR: Line %d; '%s' expects args\n", line_num, instr);
       }
-      // TODO: Handle getting <d> arg
+      // parse <d> instr
+      uint8_t d_val = parse_instr_arg(arg2);
+      if (d_val < 0) {
+        fprintf(stderr, "ERROR: Line %d; <f> argument unrecognized\n", line_num);
+        exit_safely(EXIT_FAILURE);
+      }
+
+      /* write <d> to opcode (first zero all irrelevent bits and shift to 
+       * correct position) */
+      d_val &= 0x01; // 0b00000001
+      d_val = d_val << 7;
+      opcode |= d_val;
 
     } else if ((instr_args & 0x20) != 0) { // <b> argument expected
       if (arg2 == NULL) {
         fprintf(stderr, "ERROR: Line %d; '%s' expects args\n", line_num, instr);
       }
-      // TODO: Handle getting <b> arg
+      // parse <b> instr
+      uint8_t b_val = parse_instr_arg(arg2);
+      if (b_val < 0) {
+        fprintf(stderr, "ERROR: Line %d; <f> argument unrecognized\n", line_num);
+        exit_safely(EXIT_FAILURE);
+      }
+
+      /* write <b> to opcode (first zero all irrelevent bits and shift to 
+       * correct position) */
+      b_val &= 0x07; // 0b00000111
+      b_val = b_val << 7;
+      opcode |= b_val;
 
     }
 
@@ -312,20 +341,44 @@ void handle_instruction(char* instr) {
     if (arg1 == NULL) {
       fprintf(stderr, "ERROR: Line %d; '%s' expects args\n", line_num, instr);
     }
-    // TODO: Handle getting <k> arg
     
-
-
-    // TODO: Handle properly setting <k> arg
-    if ((instr_args & 0x08) != 0) { // <k> takes 11 bits instead of 8
-
-    } else { // <k> only takes up 8 bits
-
+    // parse <k> instr
+    uint16_t k_val = parse_instr_arg(arg1);
+    if (k_val < 0) {
+      fprintf(stderr, "ERROR: Line %d; <f> argument unrecognized\n", line_num);
+      exit_safely(EXIT_FAILURE);
     }
+    
+    // zero all irrelevent bits of <k>
+    if ((instr_args & 0x08) != 0) { // <k> takes 11 bits instead of 8
+      k_val &= 0x07FF; // 0b0000011111111111
+    } else { // <k> only takes up 8 bits
+      k_val &= 0x00FF; // 0b0000000011111111
+    }
+    
+    // write <k> to opcode
+    opcode |= k_val;
+  }
   
+  // write opcode to file
+  fwrite(&opcode, sizeof(uint16_t), 1, f_write);
+}
+
+uint16_t parse_instr_arg(char* arg) {
+  // try converting to number
+  uint8_t val = char_to_num(arg);
+  // check if variable
+  int index = get_var(arg);
+  if (val < 0 && index < 0) {
+    return -1;
   }
 
-  // TODO: write opcode to file
+  // if var, set value correctly
+  if (index >= 0) {
+    val = var_values[index];
+  }
+
+  return val;
 }
 
 int get_var(char* variable) { 
