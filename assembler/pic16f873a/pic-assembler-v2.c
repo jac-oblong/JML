@@ -43,7 +43,7 @@ int num_vars = 0;
 FILE* f_read = NULL;
 FILE* f_write = NULL;
 // current line
-int line_num = 1;
+int line_num = 0;
 // buffer used to store line
 char* line = NULL;
 unsigned long line_length = 0;
@@ -315,10 +315,13 @@ void handle_label(char* lab) {
 }
 
 void handle_instruction(char* instr) {
+  // remove trailing whitespace (could be a newline)
+  while (isspace(instr[strlen(instr)-1])) instr[strlen(instr)-1] = '\0';
+
   // get index of instruction 
   int index = get_instr(instr);
   if (index < 0) {
-    fprintf(stderr, "ERROR: Line %d; instruction not recognized\n", line_num);
+    fprintf(stderr, "ERROR: Line %d; instruction '%s' not recognized\n", line_num, instr);
     exit_safely(EXIT_FAILURE);
   }
 
@@ -335,6 +338,7 @@ void handle_instruction(char* instr) {
   }
 
   uint8_t instr_args = instruction_args[index];
+  opcode = instr_opcodes[index];
 
   if ((instr_args & 0x80) != 0) { // <f> argument expected
     if (arg1 == NULL) {
@@ -374,7 +378,7 @@ void handle_instruction(char* instr) {
         fprintf(stderr, "ERROR: Line %d; '%s' expects args\n", line_num, instr);
       }
       // parse <b> instr
-      uint8_t b_val = parse_instr_arg(arg2);
+      uint16_t b_val = parse_instr_arg(arg2);
       if (b_val < 0) {
         fprintf(stderr, "ERROR: Line %d; <f> argument unrecognized\n", line_num);
         exit_safely(EXIT_FAILURE);
@@ -512,8 +516,8 @@ void set_var_array(char* variable, char* values) {
     }
     
     int num_digits = 0, i_copy = i;
-    while (i != 0) {
-      i %= 10;
+    while (i_copy != 0) {
+      i_copy %= 10;
       num_digits++;
     }
 
