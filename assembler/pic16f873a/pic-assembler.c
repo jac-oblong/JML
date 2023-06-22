@@ -543,25 +543,26 @@ void set_var_array(char* variable, char* values) {
 }
 
 int char_to_num(char* num) {
-  // check if numeric if not var
-  for (int i=0; i < strlen(num); i++) {
-    if (isdigit(num[i]) || 
-        ((num[i] == 'x' || num[i] == 'X') && i == 1) || 
-        ((num[i] == 'b' || num[i] == 'B') && i == 1)) {
-      continue;
-    }
+  // buffer for errors
+  char* err_buf;
+  // convert num into a number and return that number
+  long return_val;
+  if (num[0] == '0' && (num[1] == 'x' || num[1] == 'X')) { // hex
+    return_val = strtol(num+2, &err_buf, 16);
+  } else if (num[0] == '0' && (num[1] == 'b' || num[1] == 'B')) { // binary
+    return_val = strtol(num+2, &err_buf, 2);
+  } else { // decimal
+    return_val = strtol(num, &err_buf, 10);
+  }
+  
+  // check for any errors
+  if (strlen(err_buf) != 0) {
     return -1;
   }
 
-  // convert num into a number and return that number
-  int return_val;
-  if (num[0] == '0' && (num[1] == 'x' || num[1] == 'X')) { // hex
-    return_val = strtol(num+2, NULL, 16);
-  } else if (num[0] == '0' && (num[1] == 'b' || num[1] == 'B')) { // binary
-    return_val = strtol(num+2, NULL, 2);
-  } else { // decimal
-    return_val = strtol(num, NULL, 10);
-  }
+  #ifdef DEBUG_MODE
+  printf("char_to_num(%s) returning %d\n", num, return_val);
+  #endif
   return return_val;
 }
 
