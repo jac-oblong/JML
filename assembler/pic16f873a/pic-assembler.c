@@ -391,6 +391,9 @@ void handle_instruction(char* instr) {
       }
       // parse <b> instr
       uint16_t b_val = parse_instr_arg(arg2);
+      #ifdef DEBUG_MODE_PARSE_ARG
+      printf("Called parse arg with val %s; got %d in return\n", arg2, b_val);
+      #endif
       if (b_val < 0) {
         fprintf(stderr, "ERROR: Line %d; <f> argument unrecognized\n", line_num);
         exit_safely(EXIT_FAILURE);
@@ -398,7 +401,7 @@ void handle_instruction(char* instr) {
 
       /* write <b> to opcode (first zero all irrelevent bits and shift to 
        * correct position) */
-      b_val &= 0x07; // 0b00000111
+      b_val &= 0x0007; // 0b00000111
       b_val = b_val << 7;
       opcode |= b_val;
 
@@ -561,7 +564,7 @@ int char_to_num(char* num) {
   }
 
   #ifdef DEBUG_MODE
-  printf("char_to_num(%s) returning %d\n", num, return_val);
+  printf("char_to_num(%s) returning %ld\n", num, return_val);
   #endif
   return return_val;
 }
