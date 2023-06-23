@@ -6,4 +6,4 @@
   movwf DATA_OUT
   addlw 0x01
   btfsc DATA_OUT, 3
-  goto _LOOP
+  goto _LOOP1P

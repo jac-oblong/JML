@@ -474,6 +474,7 @@ int get_var(char* variable) {
   printf("looking for variable %s\n", variable);
   #endif
   // check input for any sort of junk
+  if (isdigit(variable[0])) return -1; // first char cannot be digit
   int num_l_bracket = 0, num_r_bracket = 0;
   for (int i=0; i < strlen(variable); i++) {
     if (!isalpha(variable[i]) && !isdigit(variable[i])) {
@@ -501,6 +502,12 @@ int get_var(char* variable) {
       }
     }
   }
+  // check for too many brackets
+  if (num_l_bracket != num_r_bracket || num_l_bracket > 1) {
+    fprintf(stderr, "ERROR: Line %d; brackets are not used correctly\n", line_num);
+    exit_safely(EXIT_FAILURE);
+  }
+
   // is the variable an array
   char working_buf[strlen(variable)+3];
   if (variable[strlen(variable)-1] == ']') {
