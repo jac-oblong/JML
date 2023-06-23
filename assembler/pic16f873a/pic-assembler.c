@@ -87,6 +87,11 @@ void handle_const(char* var, char* val);
  * location in the write file */
 void handle_label(char* lab);
 
+/* handles all necessary changes when encountering .data 
+ *
+ * this includes writing the value specified to the file */
+void handle_data(char* val);
+
 /* handles all necessary changes when encountering an instruction
  *
  * this includes forming the opcode, and writing it to the file */
@@ -95,7 +100,7 @@ void handle_instruction(char* instr);
 /* converts an argument into its corresponding values
  *
  * handles both constants and number literals */
-int16_t parse_instr_arg(char* arg);
+int32_t parse_instr_arg(char* arg);
 
 /* gets the index of a variable, returns -1 if it does not exist */ 
 int get_var(char* variable);
@@ -218,6 +223,8 @@ void parse_line() {
       handle_const(second, third);
     } else if ( strcmp(first, ".label") == 0 ) {
       handle_label(second);
+    } else if ( strcmp(first, ".data") == 0 ) {
+      handle_data(second);
     } else {
       fprintf(stderr, "ERROR: Line %d; unrecognized command %s\n", line_num, first);
       exit_safely(EXIT_FAILURE);
@@ -230,6 +237,10 @@ void parse_line() {
 }
 
 void handle_org(char* loc) {
+  if (loc == NULL) {
+    fprintf(stderr, "ERROR: Line %d; .org expects argument\n", line_num);
+    exit_safely(EXIT_FAILURE);
+  }
   // convert loc to value
   int x = parse_instr_arg(loc);
 
@@ -308,6 +319,11 @@ void handle_const(char* var, char* val) {
 }
 
 void handle_label(char* lab) {
+  if (lab == NULL) {
+    fprintf(stderr, "ERROR: Line %d; .label expects argument\n", line_num);
+    exit_safely(EXIT_FAILURE);
+  }
+
   if (get_var(lab) >= 0) {
     fprintf(stderr, "WARNING: Line %d; label overwriting value\n", line_num);
   }
@@ -331,6 +347,21 @@ void handle_label(char* lab) {
 
   // set label to value
   set_var(lab, x);
+}
+
+void handle_data(char* val) {
+  if (val == NULL) {
+    fprintf(stderr, "ERROR: Line %d; .data expects argument\n", line_num);
+    exit_safely(EXIT_FAILURE);
+  }
+  
+  int data = parse_instr_arg(val);
+  if (data < 0) {
+    fprintf(stderr, "ERROR: Line %d; .data expects number argument\n", line_num);
+    exit_safely(EXIT_FAILURE);
+  }
+
+  // TODO: finish implementing .data also add to README
 }
 
 void handle_instruction(char* instr) {
@@ -365,7 +396,7 @@ void handle_instruction(char* instr) {
     }
   
     // parse <f> instr
-    int16_t f_val = parse_instr_arg(arg1);
+    int32_t f_val = parse_instr_arg(arg1);
     if (f_val < 0) {
       fprintf(stderr, "ERROR: Line %d; <f> argument unrecognized\n", line_num);
       exit_safely(EXIT_FAILURE);
@@ -380,7 +411,7 @@ void handle_instruction(char* instr) {
         fprintf(stderr, "ERROR: Line %d; '%s' expects args\n", line_num, instr);
       }
       // parse <d> instr
-      int16_t d_val = parse_instr_arg(arg2);
+      int32_t d_val = parse_instr_arg(arg2);
       if (d_val < 0) {
         fprintf(stderr, "ERROR: Line %d; <f> argument unrecognized\n", line_num);
         exit_safely(EXIT_FAILURE);
@@ -397,7 +428,7 @@ void handle_instruction(char* instr) {
         fprintf(stderr, "ERROR: Line %d; '%s' expects args\n", line_num, instr);
       }
       // parse <b> instr
-      int16_t b_val = parse_instr_arg(arg2);
+      int32_t b_val = parse_instr_arg(arg2);
       if (b_val < 0) {
         fprintf(stderr, "ERROR: Line %d; <f> argument unrecognized\n", line_num);
         exit_safely(EXIT_FAILURE);
@@ -417,7 +448,7 @@ void handle_instruction(char* instr) {
     }
     
     // parse <k> instr
-    int16_t k_val = parse_instr_arg(arg1);
+    int32_t k_val = parse_instr_arg(arg1);
     if (k_val < 0) {
       fprintf(stderr, "ERROR: Line %d; <f> argument unrecognized\n", line_num);
       exit_safely(EXIT_FAILURE);
@@ -443,9 +474,9 @@ void handle_instruction(char* instr) {
   fwrite(&opcode, sizeof(uint16_t), 1, f_write);
 }
 
-int16_t parse_instr_arg(char* arg) {
+int32_t parse_instr_arg(char* arg) {
   // try converting to number
-  int16_t val = char_to_num(arg);
+  int32_t val = char_to_num(arg);
   // check if variable
   int index = get_var(arg);
   if (val < 0 && index < 0) {
