@@ -148,26 +148,17 @@ void parse_command_line_args(int argc, char** argv) {
   // get input options from command line arguments
   for (int i=1; i < argc; i++) {
     if ( strcmp(argv[i], "-o") == 0 ) {
-      #ifdef DEBUG_MODE
-      printf("changing output file\n");
-      #endif
       i++; // go to next argument
       output_file = argv[i];
       continue;
 
     } else if ( strcmp(argv[i], "-s") == 0 ) {
-      #ifdef DEBUG_MODE
-      printf("changing output file size\n");
-      #endif
       i++; // go to next argument
       size_set = true;
       f_size = char_to_num(argv[i]);
       continue;
 
     } else {
-      #ifdef DEBUG_MODE
-      printf("changing input file\n");
-      #endif
       input_file = argv[i];
     }
   }
@@ -331,10 +322,6 @@ void handle_label(char* lab) {
    * counts every 2 bytes */
   x /= 2;
 
-  #ifdef DEBUG_MODE_LABEL
-  printf("creating label %s with val %d\n", lab, x);
-  #endif
-
   // set label to value
   set_var(lab, x);
 }
@@ -371,14 +358,14 @@ void handle_instruction(char* instr) {
     }
   
     // parse <f> instr
-    int8_t f_val = parse_instr_arg(arg1);
+    int16_t f_val = parse_instr_arg(arg1);
     if (f_val < 0) {
       fprintf(stderr, "ERROR: Line %d; <f> argument unrecognized\n", line_num);
       exit_safely(EXIT_FAILURE);
     }
 
     // write <f> to opcode (first zero all irrelevent bits)
-    f_val &= 0x7F; // 0b01111111
+    f_val &= 0x007F; // 0b01111111
     opcode |= f_val;
 
     if ((instr_args & 0x40) != 0) { // <d> argument expected
@@ -386,7 +373,7 @@ void handle_instruction(char* instr) {
         fprintf(stderr, "ERROR: Line %d; '%s' expects args\n", line_num, instr);
       }
       // parse <d> instr
-      int8_t d_val = parse_instr_arg(arg2);
+      int16_t d_val = parse_instr_arg(arg2);
       if (d_val < 0) {
         fprintf(stderr, "ERROR: Line %d; <f> argument unrecognized\n", line_num);
         exit_safely(EXIT_FAILURE);
@@ -394,8 +381,8 @@ void handle_instruction(char* instr) {
 
       /* write <d> to opcode (first zero all irrelevent bits and shift to 
        * correct position) */
-      d_val &= 0x01; // 0b00000001
-      d_val = d_val << 7;
+      d_val = ((uint16_t)d_val) << 7;
+      d_val &= 0x0000080; // 0b0000000010000000
       opcode |= d_val;
 
     } else if ((instr_args & 0x20) != 0) { // <b> argument expected
@@ -404,9 +391,6 @@ void handle_instruction(char* instr) {
       }
       // parse <b> instr
       int16_t b_val = parse_instr_arg(arg2);
-      #ifdef DEBUG_MODE_PARSE_ARG
-      printf("Called parse arg with val %s; got %d in return\n", arg2, b_val);
-      #endif
       if (b_val < 0) {
         fprintf(stderr, "ERROR: Line %d; <f> argument unrecognized\n", line_num);
         exit_safely(EXIT_FAILURE);
@@ -414,8 +398,8 @@ void handle_instruction(char* instr) {
 
       /* write <b> to opcode (first zero all irrelevent bits and shift to 
        * correct position) */
-      b_val &= 0x0007; // 0b00000111
-      b_val = b_val << 7;
+      b_val = ((uint16_t)b_val) << 7;
+      b_val &= 0x0380; // 0b0000001110000000
       opcode |= b_val;
 
     }
@@ -470,9 +454,6 @@ int16_t parse_instr_arg(char* arg) {
 }
 
 int get_var(char* variable) { 
-  #ifdef DEBUG_MODE_LABEL
-  printf("looking for variable %s\n", variable);
-  #endif
   // check input for any sort of junk
   if (isdigit(variable[0])) return -1; // first char cannot be digit
   int num_l_bracket = 0, num_r_bracket = 0;
@@ -486,18 +467,12 @@ int get_var(char* variable) {
       // if char is '_' make sure next char is not underscore
       else if (variable[i] == '_') {
         if (variable[i+1] == '_') {
-          #ifdef DEBUG_MODE_LABEL
-          printf("quiting var %s because of 2 underscores\n", variable);
-          #endif
           return -1;
         }
         continue;
   
       // character not recognized
       } else {
-        #ifdef DEBUG_MODE_LABEL
-        printf("quiting var %s because char %c not recognized\n", variable, variable[i]);
-        #endif
         return -1;
       }
     }
@@ -511,9 +486,6 @@ int get_var(char* variable) {
   // is the variable an array
   char working_buf[strlen(variable)+3];
   if (variable[strlen(variable)-1] == ']') {
-    #ifdef DEBUG_MODE_CONST_ARRAY
-    printf("fetching variable %s...", variable);
-    #endif
     strcpy(working_buf, variable);
     // find beginning bracket
     int i=0;
@@ -537,16 +509,10 @@ int get_var(char* variable) {
     working_buf[i+3] = '\0';
     // point to edited string
     variable = working_buf;
-    #ifdef DEBUG_MODE_CONST_ARRAY
-    printf("converted into %s\n", variable);
-    #endif
   }
   
   for (int i=0; i < num_vars; i++) {
     if ( strcmp(variable, variables[i]) == 0 ) {
-      #ifdef DEBUG_MODE_LABEL
-      printf("found %s at index %d; has value %d\n", variable, i, var_values[i]);
-      #endif
       return i;
     }
   }
@@ -569,9 +535,6 @@ void set_var(char* variable, uint16_t value) {
 }
 
 void set_var_array(char* variable, char* values) {
-  #ifdef DEBUG_MODE_CONST_ARRAY
-  printf("called set_var_array( %s , %s )\n", variable, values);
-  #endif
   int i=0;
   char* next_value = strtok(values, ",");
   while (next_value != NULL) {
@@ -593,10 +556,6 @@ void set_var_array(char* variable, char* values) {
 
     char buf[strlen(variable) + 5 + num_digits];
     sprintf(buf, "%s__%d__", variable, i);
-
-    #ifdef DEBUG_MODE_CONST_ARRAY
-    printf("setting var %s to value %d\n", buf, v);
-    #endif
 
     set_var(buf, v);
 
@@ -623,9 +582,6 @@ int char_to_num(char* num) {
     return -1;
   }
 
-  #ifdef DEBUG_MODE
-  printf("char_to_num(%s) returning %ld\n", num, return_val);
-  #endif
   return return_val;
 }
 
