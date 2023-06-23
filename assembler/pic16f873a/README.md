@@ -27,6 +27,11 @@ Options:
   on the PIC16F873A). The default behavior is to create a file of unlimited 
   size.
 
+## Programming PIC16F873A
+After using the assembler to create the binary output file, use the
+[programmer](/assembler/pic16f873a/programmer/) to upload the data to the MCU.
+
+All necessary information for usage can be found in the linked directory.
 
 ## Instruction Set 
 **IMPORTANT NOTE**: In the datasheet, instructions are given in all caps, but 
