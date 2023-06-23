@@ -49,10 +49,6 @@ Literal numbers can be be specified in decimal (`128`) in binary (`0b01000000`)
 or in hex (`0x40`). Octal is not supported. Negative numbers are not supported
 as how that should be implemented is undefined and up to user specifications.
 
-#### Strings/Characters
-Like **C**, strings should be surrounded by double quotes, and characters by
-single quotes. A null terminator will be appended to each string.
-
 #### Labels
 Labels should be placed on their own line preceded by `.label`. It is good
 practice to start a label with an underscore and put the label in all caps. For
@@ -80,6 +76,14 @@ CONSTANT_ARRAY[] {0x00, 0x01, 0x02, 0x03, 0x04}` will "store" the 5 values in
 `CONSTANT_ARRAY[1]`, which would return `0x01`. Constant arrays can NOT occur 
 over  multiple lines.
 
+#### Data
+Exact data can be added to the output file using `.data`. This data will be
+added at the current position of the file. For example, `.data 0x80` will add
+the value `0x80` to the output file at the current position of the output file.
+
+Every piece of data is 2-bytes in length. Writing 1 byte of data is not directly
+possible.
+
 #### Commments
 Semicolons are used to comment the rest of the line. Example: `addlw 0x08 ; add
 0x08 to accumulator register`
@@ -88,3 +92,6 @@ Semicolons are used to comment the rest of the line. Example: `addlw 0x08 ; add
 `.org` can be used to specify where in memory the machine code should be placed.
 If none is specified, `0x00` is assumed by default. It is up to the programmer
 to make sure that no two blocks of code overwrite each other.
+
+For this assembler, using `.org` with an odd numbered value will throw off the
+instructions, as each instruction is 2 bytes long.

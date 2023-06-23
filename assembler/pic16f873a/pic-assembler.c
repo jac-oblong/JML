@@ -361,7 +361,13 @@ void handle_data(char* val) {
     exit_safely(EXIT_FAILURE);
   }
 
-  // TODO: finish implementing .data also add to README
+  // make sure not writing outside bounds of set size
+  if (size_set && ftell(f_write) / 2 >= f_size) {
+    fprintf(stderr, "ERROR: Line %d; writing outside bounds of file\n", line_num);
+    exit_safely(EXIT_FAILURE);
+  }
+  // write opcode to file
+  fwrite(&data, sizeof(uint16_t), 1, f_write);  
 }
 
 void handle_instruction(char* instr) {
@@ -466,7 +472,7 @@ void handle_instruction(char* instr) {
   }
   
   // make sure not writing outside bounds of set size
-  if (size_set && ftell(f_write) / 2 > f_size) {
+  if (size_set && ftell(f_write) / 2 >= f_size) {
     fprintf(stderr, "ERROR: Line %d; writing outside bounds of file\n", line_num);
     exit_safely(EXIT_FAILURE);
   }
