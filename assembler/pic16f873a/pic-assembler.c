@@ -487,7 +487,7 @@ int get_var(char* variable) {
     if (i == strlen(working_buf)) {
       return -1;
     }
-    // replace '[num]' at end of variable with __num__
+    // replace [num] at end of variable with __num__
     working_buf[i] = '_';
     i++;
     char temp = '_';
@@ -497,9 +497,10 @@ int get_var(char* variable) {
       temp = x;
       i++;
     }
-    working_buf[i] = '_';
+    working_buf[i] = temp;
     working_buf[i+1] = '_';
-    working_buf[i+2] = '\0';
+    working_buf[i+2] = '_';
+    working_buf[i+3] = '\0';
     // point to edited string
     variable = working_buf;
     #ifdef DEBUG_MODE_CONST_ARRAY
