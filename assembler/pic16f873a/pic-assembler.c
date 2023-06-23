@@ -483,9 +483,20 @@ int get_var(char* variable) {
         num_r_bracket++;
       }
       // if char is '_' make sure next char is not underscore
-      else if (variable[i] == '_' && variable[i+1] == '_') {
-        return -1;
+      else if (variable[i] == '_') {
+        if (variable[i+1] == '_') {
+          #ifdef DEBUG_MODE_LABEL
+          printf("quiting var %s because of 2 underscores\n", variable);
+          #endif
+          return -1;
+        }
+        continue;
+  
+      // character not recognized
       } else {
+        #ifdef DEBUG_MODE_LABEL
+        printf("quiting var %s because char %c not recognized\n", variable, variable[i]);
+        #endif
         return -1;
       }
     }

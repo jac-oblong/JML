@@ -1,6 +1,6 @@
 .const DATA_OUT 0x1F
 
-.label _LOOP
+.label _LOOP1P
   clrw
   addlw 0xFF
   movwf DATA_OUT
