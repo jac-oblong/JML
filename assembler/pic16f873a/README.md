@@ -22,8 +22,7 @@ Options:
 - `-o` can be used to specify the output file (default is `a.bin`). 
   Example: `-o out.bin`
 - `-s` can be used to specify the size (number of words/instructions) the output
-  file should be. Any space not filled by instructions will be automatically
-  filled with `nop`. Example: `-s 2300` will write create a file of size 
+  file should be. Example: `-s 2300` will write create a file of size 
   `2300 * opcode-size`. `opcode-size` is set to 2 bytes (each opcode is 14 bits
   on the PIC16F873A). The default behavior is to create a file of unlimited 
   size.
