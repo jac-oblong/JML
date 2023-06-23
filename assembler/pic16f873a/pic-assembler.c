@@ -95,7 +95,7 @@ void handle_instruction(char* instr);
 /* converts an argument into its corresponding values
  *
  * handles both constants and number literals */
-uint16_t parse_instr_arg(char* arg);
+int16_t parse_instr_arg(char* arg);
 
 /* gets the index of a variable, returns -1 if it does not exist */ 
 int get_var(char* variable);
@@ -326,6 +326,14 @@ void handle_label(char* lab) {
     perror("ftell() to find location failed\n");
     exit_safely(EXIT_FAILURE);
   }
+  
+  /* divide location by 2 becuase computer is counting every byte, but pic 
+   * counts every 2 bytes */
+  x /= 2;
+
+  #ifdef DEBUG_MODE_LABEL
+  printf("creating label %s with val %d\n", lab, x);
+  #endif
 
   // set label to value
   set_var(lab, x);
@@ -363,7 +371,7 @@ void handle_instruction(char* instr) {
     }
   
     // parse <f> instr
-    uint8_t f_val = parse_instr_arg(arg1);
+    int8_t f_val = parse_instr_arg(arg1);
     if (f_val < 0) {
       fprintf(stderr, "ERROR: Line %d; <f> argument unrecognized\n", line_num);
       exit_safely(EXIT_FAILURE);
@@ -378,7 +386,7 @@ void handle_instruction(char* instr) {
         fprintf(stderr, "ERROR: Line %d; '%s' expects args\n", line_num, instr);
       }
       // parse <d> instr
-      uint8_t d_val = parse_instr_arg(arg2);
+      int8_t d_val = parse_instr_arg(arg2);
       if (d_val < 0) {
         fprintf(stderr, "ERROR: Line %d; <f> argument unrecognized\n", line_num);
         exit_safely(EXIT_FAILURE);
@@ -395,7 +403,7 @@ void handle_instruction(char* instr) {
         fprintf(stderr, "ERROR: Line %d; '%s' expects args\n", line_num, instr);
       }
       // parse <b> instr
-      uint16_t b_val = parse_instr_arg(arg2);
+      int16_t b_val = parse_instr_arg(arg2);
       #ifdef DEBUG_MODE_PARSE_ARG
       printf("Called parse arg with val %s; got %d in return\n", arg2, b_val);
       #endif
@@ -418,7 +426,7 @@ void handle_instruction(char* instr) {
     }
     
     // parse <k> instr
-    uint16_t k_val = parse_instr_arg(arg1);
+    int16_t k_val = parse_instr_arg(arg1);
     if (k_val < 0) {
       fprintf(stderr, "ERROR: Line %d; <f> argument unrecognized\n", line_num);
       exit_safely(EXIT_FAILURE);
@@ -435,13 +443,18 @@ void handle_instruction(char* instr) {
     opcode |= k_val;
   }
   
+  // make sure not writing outside bounds of set size
+  if (size_set && ftell(f_write) / 2 > f_size) {
+    fprintf(stderr, "ERROR: Line %d; writing outside bounds of file\n", line_num);
+    exit_safely(EXIT_FAILURE);
+  }
   // write opcode to file
   fwrite(&opcode, sizeof(uint16_t), 1, f_write);
 }
 
-uint16_t parse_instr_arg(char* arg) {
+int16_t parse_instr_arg(char* arg) {
   // try converting to number
-  uint8_t val = char_to_num(arg);
+  int16_t val = char_to_num(arg);
   // check if variable
   int index = get_var(arg);
   if (val < 0 && index < 0) {
@@ -457,6 +470,9 @@ uint16_t parse_instr_arg(char* arg) {
 }
 
 int get_var(char* variable) { 
+  #ifdef DEBUG_MODE_LABEL
+  printf("looking for variable %s\n", variable);
+  #endif
   // check input for any sort of junk
   int num_l_bracket = 0, num_r_bracket = 0;
   for (int i=0; i < strlen(variable); i++) {
@@ -510,7 +526,7 @@ int get_var(char* variable) {
   
   for (int i=0; i < num_vars; i++) {
     if ( strcmp(variable, variables[i]) == 0 ) {
-      #ifdef DEBUG_MODE_CONST_ARRAY
+      #ifdef DEBUG_MODE_LABEL
       printf("found %s at index %d; has value %d\n", variable, i, var_values[i]);
       #endif
       return i;
