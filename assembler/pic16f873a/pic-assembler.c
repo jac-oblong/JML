@@ -116,6 +116,13 @@ void exit_safely(int code);
 
 int main(int argc, char** argv) {
   parse_command_line_args(argc, argv);
+  // if size specified, write to maximum to enforce it 
+  if (size_set) {
+    fseek(f_write, f_size*2-2, SEEK_SET);
+    uint16_t temp = 0x0000;
+    fwrite(&temp, sizeof(uint16_t), 1, f_write);
+    fseek(f_write, 0, SEEK_SET);
+  }
   do {
     int rc = getline(&line, &line_length, f_read);
     line_num++;
