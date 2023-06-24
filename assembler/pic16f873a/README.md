@@ -51,7 +51,7 @@ itself and a comma between each "argument".
 
 #### Numbers
 Literal numbers can be be specified in decimal (`128`) in binary (`0b01000000`)
-or in hex (`0x40`). Octal is not supported. Negative numbers are not supported
+or in hex (`0x40`). Octal is not supported. Negative numbers are not supported,
 as how that should be implemented is undefined and up to user specifications.
 
 #### Labels
@@ -60,7 +60,7 @@ practice to start a label with an underscore and put the label in all caps. For
 example: `.label _LOOP`, which can then be used: `goto _LOOP`. Underscores, 
 numbers, and letters are all acceptable in labels, but the first character 
 cannot be a number. Additionally, no more than one underscore can be used in 
-sequence. `____HI__` is not a valid name.
+sequence. `____HI__` is not a valid label.
 
 #### Constants
 Constants are sequences of characters used to represent a value. It is good
@@ -70,10 +70,12 @@ follows: `.const REG_FILE_ADDR 0x00`, and used as follows: `clrf REG_FILE_ADDR`.
 During assembly, all instances of `REG_FILE_ADDR` will be replaced with `0x00`.
 Similar to labels, underscores, numbers and letters are all acceptable, but the
 first character cannot be a number. Additionally, no more than one underscore
-can be used in sequence. `____HI__` is not a valid name.
+can be used in sequence. `____HI__` is not a valid constant.
 
 Constants are restricted to numerical values, but the value is terminated by a
-newline or comment. The size is also restricted to 16 bits.
+newline or comment. The size is also restricted to 16 bits. A constant of size 
+larger than 16 bits will be accepted, but be cut down to 16 bits at assembly,
+and cut down even further when placed in the opcode.
 
 Constants can hold more than one value by using brackets. `.const 
 CONSTANT_ARRAY[] {0x00, 0x01, 0x02, 0x03, 0x04}` will "store" the 5 values in 
@@ -95,8 +97,9 @@ Semicolons are used to comment the rest of the line. Example: `addlw 0x08 ; add
 
 #### Organization
 `.org` can be used to specify where in memory the machine code should be placed.
-If none is specified, `0x00` is assumed by default. It is up to the programmer
-to make sure that no two blocks of code overwrite each other.
+If none is specified, `0x00` is assumed by default, and that value will 
+increment with each instruction. It is up to the programmer to make sure that no 
+two blocks of code overwrite each other.
 
 For this assembler, using `.org` with an odd numbered value will throw off the
 instructions, as each instruction is 2 bytes long.
