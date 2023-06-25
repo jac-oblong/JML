@@ -42,5 +42,10 @@ void setup() {
 }
 
 void loop() {
+  if (Serial.available() > 0) {
+    int inByte = Serial.read();
 
+    Serial.print("recieved: ");
+    Serial.println(inByte, BIN);
+  }
 }
