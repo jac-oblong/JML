@@ -4,6 +4,7 @@
 .const STATUS 0x03
 .const RP0    5
 .const RP1    6
+.const C      0 ; carry out
 
 
 .org 0x0000 ; Reset vector
@@ -25,11 +26,10 @@
   addfw PORTA, 0  ; clear W, then put PORTA in W
   xorlw 0x01      ; flip bit 0 of W
   movwf PORTA     ; store W back into PORTA
-  clrw
 
+  clrw
 .label _DELAY     ; count to 256, then go back to _LOOP
   addlw 0x01      ; add 1 to W
-  movwf 0x7F      ; store W in general purpose reg
-  btfss 0x7F, 7 
+  btfss STATUS, C
   goto _DELAY
   goto _LOOP
