@@ -17,6 +17,8 @@ const int PROGM_MAN     =  5;
 bool started = false;
 // control whether or not we are programming
 bool programming = false;
+// control whether program memory has be completed
+bool progm_mem_done = false;
 // number of bytes recieved through Serial
 unsigned long num_bytes_recieved;
 // current data gotten from serial port
@@ -33,7 +35,7 @@ void start_progm();
 /* erases the entire pic microcontroller */
 void erase_pic();
 /* loads data into the pic; true ==> program memory; false ==> data memory */
-void load_data(uint16_t data, bool progm);
+void load_mem(uint16_t data, bool progm);
 /* increments the address */ 
 void incr_address();
 /* begins erase/program of pic */ 
@@ -96,18 +98,18 @@ void loop() {
     
     int inByte = Serial.read();
 
-    if (num_bytes_recieved < 8193) { // still in instruction memory
+    if (!progm_mem_done && num_bytes_recieved <= 8192) { // still in instruction memory
       if (num_bytes_recieved % 2 == 1) {
         serial_data = inByte << 8;
       } else {
         inByte &= 0x000000FF;
         serial_data |= inByte;
-        load_data(serial_data, true);
+        load_mem(serial_data, true);
         incr_address();
       }
 
     } else { // now in regular memory
-      load_data(inByte, false);
+      load_mem(inByte, false);
       incr_address();
       
     }
@@ -117,7 +119,27 @@ void loop() {
       begin_erase_program();
       num_loads = 0;
     } 
-  }  
+    
+    // if end of program mem continue to data mem
+    if (num_bytes_recieved == 8192) {
+      // move to eeprom memory
+      progm_mem_done = true;
+      programming = false;
+
+      // move to data memory
+      digitalWrite(PROGM_DTA, LOW);
+      for (int i=0; i < 6; i++) {
+        digitalWrite(PROGM_CLK, HIGH);
+        delayMicroseconds(2);
+        digitalWrite(PROGM_CLK, LOW);
+      }
+
+      // move to address 0x2100
+      for (int i=0; i < 100; i++) {
+        incr_address();
+      }  
+    }
+  }
 }
 
 void handle_leds() {
@@ -134,7 +156,7 @@ void handle_leds() {
 
 void start_progm() {
   digitalWrite(PROGM_MAN, HIGH);
-  delay(1);
+  delayMicroseconds(2);
   digitalWrite(MASTR_CLR, HIGH);
 }
 
@@ -143,7 +165,7 @@ void erase_pic() {
   digitalWrite(PROGM_DTA, LOW); 
   for (int i=0; i < 6; i++) {
     digitalWrite(PROGM_CLK, HIGH);
-    delay(1);
+    delayMicroseconds(2);
     digitalWrite(PROGM_CLK, LOW);
   }
 
@@ -151,7 +173,7 @@ void erase_pic() {
   digitalWrite(PROGM_DTA, HIGH);
   for (int i=0; i < 6; i++) {
     digitalWrite(PROGM_CLK, HIGH);
-    delay(1);
+    delayMicroseconds(2);
     digitalWrite(PROGM_CLK, LOW);
   }
   digitalWrite(PROGM_DTA, LOW); 
@@ -159,21 +181,77 @@ void erase_pic() {
 
   // get out of and re-enter programming mode so back at adress 0x0000
   digitalWrite(PROGM_MAN, LOW);
-  delay(1);
+  delayMicroseconds(2);
   digitalWrite(MASTR_CLR, LOW);
-  delay(1);
+  delayMicroseconds(2);
   start_progm();
 }
 
-void load_data(uint16_t data, bool progm) {
+void load_mem(uint16_t data, bool progm) {
   num_loads++;
+  
+  // load program mem command is 0b00000010 and load data mem is 0b00000011
+  uint8_t command = 0x02;
+  if (!progm) {
+    command++;
+  }
+  
+  // send command
+  for (int i=0; i < 6; i++) {
+    digitalWrite(PROGM_CLK, HIGH);
+    digitalWrite(PROGM_DTA, command & 0x01);
+    command = command >> 1;
+    delayMicroseconds(2);
+    digitalWrite(PROGM_CLK, LOW);
+  }
 
+  // send start bit (0)
+  digitalWrite(PROGM_CLK, HIGH);
+  digitalWrite(PROGM_DTA, LOW);
+  delayMicroseconds(2);
+  digitalWrite(PROGM_CLK, LOW);
+
+  // send first 14 bits of data
+  for (int i=0; i < 14; i++) {
+    digitalWrite(PROGM_CLK, HIGH);
+    digitalWrite(PROGM_DTA, data & 0x0001);
+    data = data >> 1;
+    delayMicroseconds(2);
+    digitalWrite(PROGM_CLK, LOW);
+  }
+
+  // send stop bit (0)
+  digitalWrite(PROGM_CLK, HIGH);
+  digitalWrite(PROGM_DTA, LOW);
+  delayMicroseconds(2);
+  digitalWrite(PROGM_CLK, LOW);
 }
 
 void increment_address() {
-
+  uint8_t command = 0x04;
+  
+  // send command
+  for (int i=0; i < 6; i++) {
+    digitalWrite(PROGM_CLK, HIGH);
+    digitalWrite(PROGM_DTA, command & 0x01);
+    command = command >> 1;
+    delayMicroseconds(2);
+    digitalWrite(PROGM_CLK, LOW);
+  }
 }
 
 void begin_erase_program() {
+  uint8_t command = 0x08;
+  
+  // send command
+  for (int i=0; i < 6; i++) {
+    digitalWrite(PROGM_CLK, HIGH);
+    digitalWrite(PROGM_DTA, command & 0x01);
+    command = command >> 1;
+    delayMicroseconds(2);
+    digitalWrite(PROGM_CLK, LOW);
+  } 
 
+  // delay while process is complete 
+  delay(10);
 }
