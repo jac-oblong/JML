@@ -17,25 +17,32 @@ const int PROGM_MAN     =  5;
 bool started = false;
 // control whether or not we are programming
 bool programming = false;
-// current instr to be programmed
-uint16_t instr;
 // number of bytes recieved through Serial
 unsigned long num_bytes_recieved;
+// current data gotten from serial port
+uint16_t serial_data;
+// number of loads performed since last program command
+uint8_t num_loads;
 
 
 /* handles the leds and when they should be on, an led being on means
  * that the corresponding push-button will recieve an input */ 
 void handle_leds();
+/* starts programming of the pic */ 
+void start_progm();
 /* erases the entire pic microcontroller */
 void erase_pic();
-/* programs the contents of `instr` to the pic */
-void progm_instr();
-/* programs `val` into the pic */
-void progm_mem(uint8_t val);
+/* loads data into the pic; true ==> program memory; false ==> data memory */
+void load_data(uint16_t data, bool progm);
+/* increments the address */ 
+void incr_address();
+/* begins erase/program of pic */ 
+void begin_erase_program();
 
 
 void setup() {
-  Serial.begin(9600);
+  // slow baud rate because need to wait while programming pic
+  Serial.begin(2400); 
   
   digitalWrite(START_PIN, LOW);
   digitalWrite(START_LED, LOW);
@@ -67,9 +74,7 @@ void loop() {
   if (!started && digitalRead(START_PIN)) {
     started = true;
     Serial.print("Starting...");
-    digitalWrite(PROGM_MAN, HIGH);
-    delay(1);
-    digitalWrite(MASTR_CLR, HIGH);
+    start_progm();
     Serial.println("Done");
   }
   if (!started) return;
@@ -91,18 +96,27 @@ void loop() {
     
     int inByte = Serial.read();
 
-    if (num_bytes_recieved < 8192) { // still in instruction memory
+    if (num_bytes_recieved < 8193) { // still in instruction memory
       if (num_bytes_recieved % 2 == 1) {
-        instr = inByte << 8;
+        serial_data = inByte << 8;
       } else {
         inByte &= 0x000000FF;
-        instr |= inByte;
-        progm_instr();
+        serial_data |= inByte;
+        load_data(serial_data, true);
+        incr_address();
       }
 
     } else { // now in regular memory
-      progm_mem(inByte);
+      load_data(inByte, false);
+      incr_address();
+      
     }
+    
+    // begin programming if 8 bytes loaded
+    if (num_loads == 8) {
+      begin_erase_program();
+      num_loads = 0;
+    } 
   }  
 }
 
@@ -116,4 +130,50 @@ void handle_leds() {
     digitalWrite(ERASE_LED, HIGH);
     digitalWrite(PROGM_LED, HIGH);
   }
+}
+
+void start_progm() {
+  digitalWrite(PROGM_MAN, HIGH);
+  delay(1);
+  digitalWrite(MASTR_CLR, HIGH);
+}
+
+void erase_pic() {
+  // load configuration so ALL data is erased (code is 0b00000)
+  digitalWrite(PROGM_DTA, LOW); 
+  for (int i=0; i < 6; i++) {
+    digitalWrite(PROGM_CLK, HIGH);
+    delay(1);
+    digitalWrite(PROGM_CLK, LOW);
+  }
+
+  // erase chip (code is 0b11111)
+  digitalWrite(PROGM_DTA, HIGH);
+  for (int i=0; i < 6; i++) {
+    digitalWrite(PROGM_CLK, HIGH);
+    delay(1);
+    digitalWrite(PROGM_CLK, LOW);
+  }
+  digitalWrite(PROGM_DTA, LOW); 
+  delay(10); // wait for erase to complete
+
+  // get out of and re-enter programming mode so back at adress 0x0000
+  digitalWrite(PROGM_MAN, LOW);
+  delay(1);
+  digitalWrite(MASTR_CLR, LOW);
+  delay(1);
+  start_progm();
+}
+
+void load_data(uint16_t data, bool progm) {
+  num_loads++;
+
+}
+
+void increment_address() {
+
+}
+
+void begin_erase_program() {
+
 }
