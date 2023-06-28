@@ -2,16 +2,16 @@
 
 
 // PINS
-const int START_PIN     = A0;
-const int START_LED     = A1;
-const int ERASE_PIN     = A2;
-const int ERASE_LED     = A3;
-const int PROGM_PIN     = A4;
-const int PROGM_LED     = A5;
-const int PROGM_CLK     =  2;
-const int PROGM_DTA     =  3;
-const int MASTR_CLR     =  4;
-const int PROGM_MAN     =  5;
+const int START_READ_PIN    = A0;
+const int START_READ_LED    = A1;
+const int ERASE_PIN         = A2;
+const int ERASE_LED         = A3;
+const int PROGM_PIN         = A4;
+const int PROGM_LED         = A5;
+const int PROGM_CLK         =  2;
+const int PROGM_DTA         =  3;
+const int MASTR_CLR         =  4;
+const int PROGM_MAN         =  5;
 
 // control whether or not to do anything
 bool started = false;
@@ -32,6 +32,8 @@ uint8_t num_loads;
 void handle_leds();
 /* starts programming of the pic */ 
 void start_progm();
+/* reads the entire contents of memory */ 
+void read_mem();
 /* erases the entire pic microcontroller */
 void erase_pic();
 /* loads data into the pic; true ==> program memory; false ==> data memory */
@@ -46,8 +48,8 @@ void setup() {
   // slow baud rate because need to wait while programming pic
   Serial.begin(2400); 
   
-  digitalWrite(START_PIN, LOW);
-  digitalWrite(START_LED, LOW);
+  digitalWrite(START_READ_PIN, LOW);
+  digitalWrite(START_READ_LED, LOW);
   digitalWrite(ERASE_PIN, LOW);
   digitalWrite(ERASE_LED, LOW);
   digitalWrite(PROGM_PIN, LOW);
@@ -57,11 +59,11 @@ void setup() {
   digitalWrite(MASTR_CLR, LOW);
   digitalWrite(PROGM_MAN, LOW);
 
-  pinMode(START_PIN, INPUT);
+  pinMode(START_READ_PIN, INPUT);
   pinMode(ERASE_PIN, INPUT);
   pinMode(PROGM_PIN, INPUT);
   
-  pinMode(START_LED, OUTPUT);
+  pinMode(START_READ_LED, OUTPUT);
   pinMode(ERASE_LED, OUTPUT);
   pinMode(PROGM_LED, OUTPUT);
   pinMode(PROGM_CLK, OUTPUT);
@@ -73,13 +75,18 @@ void setup() {
 void loop() {
   handle_leds();
 
-  if (!started && digitalRead(START_PIN)) {
+  if (!started && digitalRead(START_READ_PIN)) {
     started = true;
     Serial.print("Starting...");
     start_progm();
     Serial.println("Done");
   }
   if (!started) return;
+
+  if (digitalRead(START_READ_PIN)) {
+    Serial.println("Reading from memory now\n");
+    read_mem();
+  }
 
   if (digitalRead(ERASE_PIN) && !programming) {
     Serial.print("Erasing...");
@@ -143,11 +150,11 @@ void loop() {
 }
 
 void handle_leds() {
-  digitalWrite(START_LED, LOW);
+  digitalWrite(START_READ_LED, LOW);
   digitalWrite(ERASE_LED, LOW);
   digitalWrite(PROGM_LED, LOW);
   if (!started) {
-    digitalWrite(START_LED, HIGH);
+    digitalWrite(START_READ_LED, HIGH);
   } else if (!programming) {
     digitalWrite(ERASE_LED, HIGH);
     digitalWrite(PROGM_LED, HIGH);
@@ -158,6 +165,46 @@ void start_progm() {
   digitalWrite(PROGM_MAN, HIGH);
   delayMicroseconds(2);
   digitalWrite(MASTR_CLR, HIGH);
+}
+
+void read_mem() {
+  pinMode(PROGM_DTA, INPUT_PULLUP);
+
+  uint8_t command = 0x04;
+  for (int i=0; i <= 0x1FFF; i++) {
+    if (i % 8 == 0) {
+      Serial.println();
+      Serial.print("i:");
+      Serial.print(i,HEX);
+      Serial.print("\t");
+      delay(50);
+    } else {
+      Serial.print("\t");
+    }
+
+    // send command to read data
+    for (int j=0; j < 6; j++) {
+      digitalWrite(PROGM_CLK, HIGH);
+      digitalWrite(PROGM_DTA, command & 0x01);
+      command = command >> 1;
+      delayMicroseconds(2);
+      digitalWrite(PROGM_CLK, LOW);
+    }
+    uint16_t data = 0;
+    // read data from pic
+    for (int j=0; j < 16; j++) {
+      digitalWrite(PROGM_CLK, HIGH);
+      delayMicroseconds(2);
+      data |= digitalRead(PROGM_DTA) << 1;
+      digitalWrite(PROGM_CLK, LOW);
+    }
+
+    incr_address();
+
+    Serial.print(data);
+  }
+  
+  pinMode(PROGM_DTA, OUTPUT);
 }
 
 void erase_pic() {
@@ -228,7 +275,7 @@ void load_mem(uint16_t data, bool progm) {
 }
 
 void incr_address() {
-  uint8_t command = 0x04;
+  uint8_t command = 0x06;
   
   // send command
   for (int i=0; i < 6; i++) {
