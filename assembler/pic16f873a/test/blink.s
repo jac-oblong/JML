@@ -23,7 +23,7 @@
 
 .label _LOOP
   clrw
-  addfw PORTA, 0  ; clear W, then put PORTA in W
+  addwf PORTA, 0  ; clear W, then put PORTA in W
   xorlw 0x01      ; flip bit 0 of W
   movwf PORTA     ; store W back into PORTA
 

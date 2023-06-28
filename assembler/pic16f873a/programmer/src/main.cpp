@@ -87,7 +87,7 @@ void loop() {
     Serial.println("Done");
   }
 
-  if (digitalRead(PROGM_PIN)) {
+  if (!programming && digitalRead(PROGM_PIN)) {
     programming = true;
     Serial.println("Programming has begun, send data now");
   }
@@ -227,7 +227,7 @@ void load_mem(uint16_t data, bool progm) {
   digitalWrite(PROGM_CLK, LOW);
 }
 
-void increment_address() {
+void incr_address() {
   uint8_t command = 0x04;
   
   // send command
