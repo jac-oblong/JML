@@ -1,8 +1,9 @@
 # PIC16F873A
 
-This microcontroller is used in various peripherals on the computer(s). Data
-sheets can be found in the [datasheets](/docs/datasheets/) directory. For
-information on memory organization in the microcontroller, the
+This microcontroller was used as a basis for writing an assembler because of its
+simple and short instruction set. Data sheets can be found in the 
+[datasheets](/docs/datasheets/) directory. For information on memory 
+organization in the microcontroller, the 
 [PIC16F873A](/docs/datasheets/PIC16F873A.pdf) data sheet should be referenced.
 For information on programming the microcontroller, use the
 [Programming](/docs/datasheets/PIC16F873A-Flash-Memory-Programming.pdf)

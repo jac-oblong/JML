@@ -26,3 +26,7 @@ keyboard interface. This was used as a starting point for interfacing with the
 keyboard, including how to interface with the **Perixx PERIBOARD-409P**. It is
 not used in the final version of the computer, but may be useful in
 understanding how the interface works on a basic level.
+
+The `logisim` directory contains a [Logisim](https://github.com/logisim-evolution/logisim-evolution) 
+simulation of the keyboard interface. This simulation was then used to design
+the actual interface.
