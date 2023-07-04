@@ -21,8 +21,11 @@ Some links I found helpful in discovering this problem:
 [Reddit](https://www.reddit.com/r/beneater/comments/m836ul/ps2_keyboard_not_working_on_the_6502_but_is/)
 
 ## Directory Organization
-The `arduino-based-reciever` directory has code for an initial version of the
+The [arduino-based-receiver](arduino-based-receiver) directory has code for an initial version of the
 keyboard interface. This was used as a starting point for interfacing with the
 keyboard, including how to interface with the **Perixx PERIBOARD-409P**. It is
 not used in the final version of the computer, but may be useful in
 understanding how the interface works on a basic level.
+
+The [fpga](fgpa) directory contains all the code used to program the FPGA. The 
+specific FPGA used is the **Tang Nano 9k**.
