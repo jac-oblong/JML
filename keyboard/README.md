@@ -8,8 +8,8 @@ this odd keyboard.
 
 ## Changes to Normal ps/2 protocol
 Normal ps/2 keyboards will send usually send the code `0xAA` to the computer if
-they are working correctly on bootup, and then continue with normal operation.
-The **PERIBOARD-409P**, however, will continually send that scancode until
+they are working correctly on boot-up, and then continue with normal operation.
+The **PERIBOARD-409P**, however, will continually send that scan-code until
 receiving a response in order to tell if it should be using ps/2 or usb
 protocol. Because of this, the computer will send the code `0xFF` (the code for
 reset) when `0xAA` is received.
@@ -26,7 +26,3 @@ keyboard interface. This was used as a starting point for interfacing with the
 keyboard, including how to interface with the **Perixx PERIBOARD-409P**. It is
 not used in the final version of the computer, but may be useful in
 understanding how the interface works on a basic level.
-
-The `logisim` directory contains a [Logisim](https://github.com/logisim-evolution/logisim-evolution) 
-simulation of the keyboard interface. This simulation was then used to design
-the actual interface.
