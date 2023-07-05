@@ -3,43 +3,61 @@
 * resetting of the PERIBOARD ps/2 keyboard. (sends code 0xFF)
 */
 
-module  initial_response #(
+module  initial_response 
+#(
   parameter   MAX_COUNT       = 1, // number of clk ticks to keep ps2_clk low
-  parameter   BIT_WIDTH       = 4  // number of bits needed for MAX_COUNT
+  parameter   BIT_WIDTH       = 1  // number of bits needed for MAX_COUNT
 )
 (
   input             reset_required, // code 0xAA recieved
                     clk,
+                    rst, // reset count to 0
   
   output    reg     ps2_clk_pulldown,
             reg     ps2_data_pulldown
 );
   
-  reg   [BIT_WIDTH:0]   count;
-  reg                   counting;
+  reg                   c1_en;
+  reg                   c1_rst;
+  reg                   c1_overflow;
+  reg                   c1_max_val;
+  reg [BIT_WIDTH-1:0]   c1_count;
+
+  counter c1(
+    .en(c1_en),
+    .clk(clk),
+    .rst(c1_rst),
+    .overflow(c1_overflow),
+    .max_val(c1_max_val),
+    .count(c1_count),
+    .BIT_WIDTH(BIT_WIDTH),
+    .MAX_VALUE(MAX_COUNT)
+  );
 
   always @(posedge clk) begin 
+    c1_rst <= rst; // always reset counter if this module reset
+    if (rst) begin 
+      c1_en <= 0;
+    end
     // start counting and pull down ps2_clk
     if (reset_required) begin 
-      counting <= 1;
+      c1_en <= 1;
       ps2_clk_pulldown <= 1;
     end
 
     // while counting, count
-    if (counting) begin
-      count <= count + 1;
+    if (c1_en) begin
       // if reached MAX_COUNT, stop counting
-      if (count >= MAX_COUNT) begin
-        count <= 0;
-        counting <= 0;
+      if (c1_max_val) begin
+        c1_en <= 0;
+        c1_rst <= 1;
         ps2_clk_pulldown <= 0;
       end
     end
-  end 
 
-  // never want to drive data low, only message sent to keyboard is 0xFF
-  always @(*) begin 
-    ps2_data_pulldown = 0;
-  end
+    // never want to drive data low, only message sent to keyboard is 0xFF
+    ps2_data_pulldown <= 0;
+  
+  end 
 
 endmodule
