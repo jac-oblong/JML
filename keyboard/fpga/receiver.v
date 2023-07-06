@@ -10,6 +10,7 @@ module receiver
   input               ps2_data,
                       ps2_clk,
                       rst,
+
   output  reg [10:0]  data,
           reg         data_latch, // used to latch data into other modules
           reg         reset_required, // used when 0xAA received
@@ -41,13 +42,14 @@ module receiver
     end 
     
     // set appropriate signal if 11 bits clocked in
+    // bits come in lsb first, so data[8] is lsb
     if (c1_max_val) begin 
-      if (data[8:1] == 8'hAA) begin 
+      if (data[8:1] == 8'h55) begin  // 0xAA is actual code, but 0x55 cause of bit ordering
         reset_required <= 1;
       end else if (data[8:1] == 8'hFF) begin 
-      end else if (data[8:1] == 8'hF0) begin 
+      end else if (data[8:1] == 8'h0F) begin // 0xF0
         release_key <= 1;
-      end else if (data[8:1] == 8'hE0) begin 
+      end else if (data[8:1] == 8'h07) begin // 0xE0
         extended_code <= 1;
       end else begin 
         data_latch <= 1;
