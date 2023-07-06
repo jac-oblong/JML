@@ -34,16 +34,13 @@ module receiver
   );
 
   always @ (negedge ps2_clk, posedge c1_max_val) begin 
-    reset_required <= 0;
-    release_key <= 0;
-    extended_code <= 0;
-    data_latch <= 0;
-
+    // shift in new bit
     if (!ps2_clk) begin
       data <= data << 1;
       data[0] <= ps2_data;
     end 
-
+    
+    // set appropriate signal if 11 bits clocked in
     if (c1_max_val) begin 
       if (data[8:1] == 8'hAA) begin 
         reset_required <= 1;
@@ -55,6 +52,13 @@ module receiver
       end else begin 
         data_latch <= 1;
       end
+
+    // else set all output signals to 0
+    end else begin 
+      reset_required <= 0;
+      release_key <= 0;
+      extended_code <= 0;
+      data_latch <= 0;
     end
   end
 
