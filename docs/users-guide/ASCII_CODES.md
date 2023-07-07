@@ -20,7 +20,6 @@ entirely control characters. The full list of ignored characters is below.
 | Enquiry | 05 |
 | Acknowledge | 06 |
 | Bell | 07 |
-| Vertical Tabulation | 0B |
 | Form Feed | 0C |
 | Shift Out | 0E |
 | Shift In | 0F |
@@ -35,6 +34,7 @@ entirely control characters. The full list of ignored characters is below.
 | Cancel | 18 |
 | End of medium | 19 |
 | Substitute | 1A |
+| Escape | 1B |
 | File Separator | 1C |
 | Group Separator | 1D |
 | Record Separator | 1E |
@@ -44,6 +44,19 @@ entirely control characters. The full list of ignored characters is below.
 Below is the table of control characters added in addition to the normal *ascii*
 characters.
 
-| Description | Hexadecimal |
-| -------------- | -------------- |
-
+| Name              | Hexadecimal | Description                                   | Escape Sequence |
+| ----------------- | ----------- | --------------------------------------------- | --------------- |
+| Null              | 80          | Character that ends string                    | '\0'            |
+| Control (CTRL)    | 81          | CTRL modifier is added to next character      |                 |
+| Alt (ALT)         | 82          | ALT modifier is added to next character       |                 |
+| Escape (ESC)      | 83          | Escape key pressed (different from '\')       |                 |
+| Up (Arrow Key)    | 84          | Up Arrow Key, moves cursor up line            |                 |
+| Down (Arrow Key)  | 85          | Down Arrow Key, moves cursor down line        |                 |
+| Left (Arrow Key)  | 86          | Left Arrow Key, moves cursor left             |                 |
+| Right (Arrow Key) | 87          | Right Arrow Key, moves cursor right           |                 |
+| Backspace         | 88          | Will remove last character                    | '\b'            |
+| Tab (Horizontal)  | 89          | Horizontal Tab (2 character space)            | '\t'            |
+| New Line          | 8A          | Moves cursor to beginning of next line        | '\n'            |
+| Tab (Vertical)    | 8B          | Vertical Tab (length of 1 line)               | '\v'            |
+|                   |             |                                               |                 |
+| Carriage Return   | 8D          | Moves cursor to beginning of current line     | '\r'            |
