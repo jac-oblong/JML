@@ -14,7 +14,7 @@ module  initial_response
                     rst, // reset count to 0
   
   output    reg     ps2_clk_pulldown,
-            reg     ps2_data_pulldown
+  output    reg     ps2_data_pulldown
 );
   
   reg                   c1_en;

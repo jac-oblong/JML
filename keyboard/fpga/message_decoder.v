@@ -13,7 +13,7 @@ module message_decoder
                         extended_code,
 
   output  reg [7:0]     ascii_out,
-          reg           ascii_latch
+  output  reg           ascii_latch
 );
   
   reg [7:0]     scan_code;

@@ -14,8 +14,8 @@ module counter
                                 rst,
 
   output  reg                   overflow,
-          reg                   max_val,
-          reg [BIT_WIDTH-1:0]   count
+  output  reg                   max_val,
+  output  reg [BIT_WIDTH-1:0]   count
 );
 
   reg [BIT_WIDTH:0] count_temp; // temp var to make detect overflow

@@ -12,10 +12,10 @@ module receiver
                       rst,
 
   output  reg [10:0]  data,
-          reg         data_latch, // used to latch data into other modules
-          reg         reset_required, // used when 0xAA received
-          reg         release_key, // used when 0xF0 received
-          reg         extended_code // used when 0xE0 received
+  output  reg         data_latch, // used to latch data into other modules
+  output  reg         reset_required, // used when 0xAA received
+  output  reg         release_key, // used when 0xF0 received
+  output  reg         extended_code // used when 0xE0 received
 );
 
   reg                 c1_en = 1;
