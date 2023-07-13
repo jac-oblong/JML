@@ -8,9 +8,9 @@ module message_decoder
 
 ) (
   input       [7:0]     message_in,
-                        message_latch,
-                        release_key,
-                        extended_code,
+  input                 message_latch,
+  input                 release_key,
+  input                 extended_code,
 
   output  reg [7:0]     ascii_out,
   output  reg           ascii_latch
