@@ -1,7 +1,5 @@
 #include "pins_arduino.h"
 #include <Arduino.h>
-#include <cstdint>
-#include <cstdio>
 
 const int CLK = 2;
 const int WR = 3;
@@ -75,4 +73,22 @@ void loop() {
             data_line, (int)clk_line, (int)wr_line, (int)rd_line);
     Serial.println(buffer);
   }
+}
+
+void Interrupt() {
+  clk_line = digitalRead(CLK);
+  wr_line = digitalRead(WR);
+  rd_line = digitalRead(RD);
+
+  addr_line = 0;
+  for (int i = 22; i <= 52; i += 2) {
+    addr_line |= (digitalRead(i) & 0x0001) << ((i - 22) / 2);
+  }
+
+  data_line = 0;
+  for (int i = 23; i <= 37; i += 2) {
+    data_line |= (digitalRead(i) & 0x01) << ((i - 23) / 2);
+  }
+
+  isr_flag = 1;
 }
