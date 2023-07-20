@@ -5,16 +5,18 @@
 `timescale 1 ns / 1 ps
 
 module receiver_tb ();
-  reg         ps2_data = 1;
-  reg         ps2_clock = 1;
-  reg         rst = 0;
-  wire [10:0] data;
-  wire        data_latch;
-  wire        reset_required;
-  wire        release_key;
-  wire        extended_code;
+  reg            ps2_data = 1;
+  reg            ps2_clock = 1;
+  reg            rst = 0;
+  wire    [10:0] data;
+  wire           data_latch;
+  wire           reset_required;
+  wire           release_key;
+  wire           extended_code;
 
-  reg  [10:0] read_data      [4];
+  reg     [10:0] read_data      [0:3];
+  integer        i;
+  integer        j;
 
   receiver #() r (
       .ps2_data(ps2_data),
@@ -27,21 +29,17 @@ module receiver_tb ();
       .extended_code(extended_code)
   );
 
-  always begin
-    #1 clk = ~clk;
-  end
-
   initial begin
     #1 rst = 1;
     #1 rst = 0;
 
-    $readmemb("io/receiver_io.txt", read_data);
+    $readmemb("testbenches/io/receiver_io.txt", read_data);
 
     for (i = 0; i < 4; i = i + 1) begin
       for (j = 0; j < 11; j = j + 1) begin
         #2 ps2_data = read_data[i][j];
-        #1 ps2_clk = 0;
-        #1 ps2_clk = 1;
+        #1 ps2_clock = 0;
+        #1 ps2_clock = 1;
         #4;
       end
       #10;
