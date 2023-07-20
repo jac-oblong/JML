@@ -20,25 +20,29 @@ module initial_response #(
     output reg ps2_data_pulldown
 );
 
-  reg                 c1_en;
-  reg                 c1_rst;
-  reg                 c1_max_val;
-  reg [BIT_WIDTH-1:0] c1_count;
+  reg                  c1_en;
+  reg                  c1_rst;
+  wire                 c1_max_val;
+  wire [BIT_WIDTH-1:0] c1_count;
 
-  counter c1 (
+  counter #(
+      .BIT_WIDTH(BIT_WIDTH),
+      .MAX_VALUE(MAX_COUNT)
+  ) c1 (
       .en(c1_en),
       .clk(clk),
       .rst(c1_rst),
       .max_val(c1_max_val),
-      .count(c1_count),
-      .BIT_WIDTH(BIT_WIDTH),
-      .MAX_VALUE(MAX_COUNT)
+      .count(c1_count)
   );
 
   always @(posedge clk) begin
-    c1_rst <= rst;  // always reset counter if this module reset
+    // always reset counter if this module is reset
+    c1_rst <= rst;
     if (rst) begin
       c1_en <= 0;
+      ps2_clk_pulldown <= 0;
+      ps2_data_pulldown <= 0;
     end
     // start counting and pull down ps2_clk
     if (reset_required) begin
@@ -56,9 +60,8 @@ module initial_response #(
       end
     end
 
-    // never want to drive data low, only message sent to keyboard is 0xFF
+    // never want to pull data line low
     ps2_data_pulldown <= 0;
-
   end
 
 endmodule

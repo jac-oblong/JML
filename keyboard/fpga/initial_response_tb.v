@@ -11,15 +11,15 @@ module initial_response_tb ();
   wire ps2_clk_pull_down;
   wire ps2_data_pull_down;
 
-  reset_required #(
-      .MAX_VALUE(16),
+  initial_response #(
+      .MAX_COUNT(16),
       .BIT_WIDTH(5)
   ) r (
       .reset_required(reset_required),
       .clk(clk),
       .rst(rst),
-      .ps2_clk_pull_down(ps2_clk_pull_down),
-      .ps2_data_pull_down(ps2_data_pull_down)
+      .ps2_clk_pulldown(ps2_clk_pull_down),
+      .ps2_data_pulldown(ps2_data_pull_down)
   );
 
   always begin
@@ -29,8 +29,9 @@ module initial_response_tb ();
   initial begin
     #1 rst = 1;
     #1 rst = 0;
-    reset_required = 0;
-    #25 $finish;
+    reset_required = 1;
+    #2 reset_required = 0;
+    #50 $finish;
   end
 
   initial begin
