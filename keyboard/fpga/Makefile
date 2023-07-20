@@ -5,16 +5,16 @@ DEVICE=GW1NR-LV9QN88PC6/I5
 all: test
 
 # Test
-counter_test.o: counter.v counter_tb.v
-	iverilog -o counter_test.o -s counter_tb counter.v counter_tb.v
+initial_response_test.o: counter.v initial_response.v initial_response_tb.v
+	iverilog -o initial_response_test.o -s initial_response_tb counter.v initial_response.v initial_response_tb.v
 
 # Simulate
-test: counter_test.o
-	vvp counter_test.o
+test: initial_response_test.o
+	vvp initial_response_test.o
 
 # Cleanup build artifacts
 clean:
-	rm counter_test.o
+	rm initial_response_test.o
 
 .PHONY: clean test
-.INTERMEDIATE: counter_test.o
+.INTERMEDIATE: initial_response_test.o
