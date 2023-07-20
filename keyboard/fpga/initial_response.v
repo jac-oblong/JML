@@ -19,7 +19,6 @@ module  initial_response
   
   reg                   c1_en;
   reg                   c1_rst;
-  reg                   c1_overflow;
   reg                   c1_max_val;
   reg [BIT_WIDTH-1:0]   c1_count;
 
@@ -27,7 +26,6 @@ module  initial_response
     .en(c1_en),
     .clk(clk),
     .rst(c1_rst),
-    .overflow(c1_overflow),
     .max_val(c1_max_val),
     .count(c1_count),
     .BIT_WIDTH(BIT_WIDTH),
