@@ -3,9 +3,7 @@
 * into a format that the rest of the system can use
 */
 
-module receiver #(
-
-) (
+module receiver (
     input ps2_data,
     input ps2_clk,
     input rst,
@@ -17,20 +15,19 @@ module receiver #(
     output reg        extended_code    // used when 0xE0 received
 );
 
-  reg       c1_en = 1;
-  reg       c1_max_val;
-  reg       c1_overflow;
-  reg [3:0] c1_count;
+  reg        c1_en = 1;
+  wire       c1_max_val;
+  wire [3:0] c1_count;
 
-  counter c1 (
+  counter #(
+      .MAX_VALUE(11),
+      .BIT_WIDTH(4)
+  ) c1 (
       .en(c1_en),
       .clk(ps2_clk),
       .rst(rst),
       .max_val(c1_max_val),
-      .overflow(c1_overflow),
-      .count(c1_count),
-      .MAX_VALUE(11),
-      .BIT_WIDTH(4)
+      .count(c1_count)
   );
 
   always @(negedge ps2_clk, posedge c1_max_val) begin
