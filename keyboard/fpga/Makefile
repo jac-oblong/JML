@@ -2,7 +2,7 @@ BOARD=tangnano9k
 FAMILY=GW1N-9C
 DEVICE=GW1NR-LV9QN88PC6/I5
 
-all: test
+all: test clean
 
 # Test
 receiver_test.o: counter.v receiver.v testbenches/receiver_tb.v
@@ -13,8 +13,9 @@ test: receiver_test.o
 	vvp receiver_test.o
 
 # Cleanup build artifacts
-clean:
+clean: test
 	rm receiver_test.o
+	mv *.vcd ./waveforms
 
 .PHONY: clean test
 .INTERMEDIATE: receiver_test.o
