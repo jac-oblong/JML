@@ -29,7 +29,7 @@ module counter #(
     if (en && !rst) begin
       count <= count + 1;
       // MAX_VALUE reached
-      if (count == MAX_VALUE) begin
+      if (count == MAX_VALUE - 1) begin
         max_val <= 1;
         count   <= 0;
       end else begin
