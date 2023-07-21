@@ -14,13 +14,13 @@ module receiver_tb ();
   wire           release_key;
   wire           extended_code;
 
-  reg     [10:0] read_data      [0:3];
+  reg     [0:10] read_data      [0:3];
   integer        i;
   integer        j;
 
   receiver #() r (
       .ps2_data(ps2_data),
-      .ps2_clk(ps2_clk),
+      .ps2_clk(ps2_clock),
       .rst(rst),
       .data(data),
       .data_latch(data_latch),
