@@ -40,11 +40,11 @@ module receiver (
     // set appropriate signal if 11 bits clocked in
     // bits come in lsb first, so data[8] is lsb
     if (c1_max_val) begin
-      if (data[8:1] == 8'h55) begin  // 0xAA is actual code, but 0x55 cause of bit ordering
+      if (data[9:2] == 8'h55) begin  // 0xAA is actual code, but 0x55 cause of bit ordering
         reset_required <= 1;
-      end else if (data[8:1] == 8'h0F) begin  // 0xF0
+      end else if (data[9:2] == 8'h0F) begin  // 0xF0
         release_key <= 1;
-      end else if (data[8:1] == 8'h07) begin  // 0xE0
+      end else if (data[9:2] == 8'h07) begin  // 0xE0
         extended_code <= 1;
       end else begin
         data_latch <= 1;
