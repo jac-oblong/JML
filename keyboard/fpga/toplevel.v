@@ -6,7 +6,7 @@ module toplevel (
     input ps2_data,  // ps2 keyboard data line
     input ps2_clk,   // ps2 keyboard clock line
     input clk,
-    input rst,
+    //input rst,
     //input cpu_ack, // line used by cpu to acknoledge interrupt
 
     //output reg       cpu_intr,           // line used to interrupt the cpu
@@ -19,8 +19,7 @@ module toplevel (
 
   receiver #() rec (
       .ps2_data(ps2_data),
-      .ps2_clk(ps2_clk),
-      .rst(rst)
+      .ps2_clk (ps2_clk),
   );
 
   initial_response #(
@@ -29,7 +28,6 @@ module toplevel (
   ) init_resp (
       .reset_required(reset_required),
       .clk(clk),
-      .rst(rst),
       .ps2_data_pulldown(ps2_data_pulldown),
       .ps2_clk_pulldown(ps2_clk_pulldown)
   );
