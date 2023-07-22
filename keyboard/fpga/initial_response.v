@@ -36,6 +36,12 @@ module initial_response #(
       .count(c1_count)
   );
 
+  always @(posedge reset_required) begin
+    // start counting and pull down ps2_clk
+    c1_en <= 1;
+    ps2_clk_pulldown <= 1;
+  end
+
   always @(posedge clk) begin
     // always reset counter if this module is reset
     c1_rst <= rst;
@@ -44,13 +50,7 @@ module initial_response #(
       ps2_clk_pulldown <= 0;
       ps2_data_pulldown <= 0;
     end
-    // start counting and pull down ps2_clk
-    if (reset_required) begin
-      c1_en <= 1;
-      ps2_clk_pulldown <= 1;
-    end
 
-    // while counting, count
     if (c1_en) begin
       // if reached MAX_COUNT, stop counting
       if (c1_max_val) begin

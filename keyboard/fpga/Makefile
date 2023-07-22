@@ -5,17 +5,18 @@ DEVICE=GW1NR-LV9QN88PC6/I5
 all: test clean
 
 # Test
-receiver_test.o: counter.v receiver.v testbenches/receiver_tb.v
-	iverilog -o receiver_test.o -s receiver_tb counter.v receiver.v testbenches/receiver_tb.v
+reset_keyboard_test.o: counter.v receiver.v initial_response.v testbenches/reset_keyboard_tb.v
+	iverilog -o reset_keyboard_test.o -s reset_keyboard_tb counter.v receiver.v \
+		initial_response.v testbenches/reset_keyboard_tb.v
 
 # Simulate
-test: receiver_test.o
-	vvp receiver_test.o
+test: reset_keyboard_test.o
+	vvp reset_keyboard_test.o
 
 # Cleanup build artifacts
 clean: test
-	rm receiver_test.o
+	rm reset_keyboard_test.o
 	mv *.vcd ./waveforms
 
 .PHONY: clean test
-.INTERMEDIATE: receiver_test.o
+.INTERMEDIATE: reset_keyboard_test.o
