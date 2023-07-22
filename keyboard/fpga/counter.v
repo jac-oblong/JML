@@ -20,12 +20,12 @@ module counter #(
     output reg [BIT_WIDTH-1:0] count
 );
 
-  always @(posedge clk, posedge rst) begin
-    if (rst) begin
-      max_val <= 0;
-      count   <= 0;
-    end
+  always @(posedge rst) begin
+    max_val <= 0;
+    count   <= 0;
+  end
 
+  always @(posedge clk) begin
     if (en && !rst) begin
       count <= count + 1;
       // MAX_VALUE reached

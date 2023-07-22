@@ -30,28 +30,28 @@ module receiver (
       .count(c1_count)
   );
 
-  always @(negedge ps2_clk, posedge c1_max_val) begin
+  always @(posedge c1_max_val) begin
+    // set appropriate signal if 11 bits clocked in
+    // bits come in lsb first, so data[8] is lsb
+    if (data[9:2] == 8'h55) begin  // 0xAA is actual code, but 0x55 cause of bit ordering
+      reset_required <= 1;
+    end else if (data[9:2] == 8'h0F) begin  // 0xF0
+      release_key <= 1;
+    end else if (data[9:2] == 8'h07) begin  // 0xE0
+      extended_code <= 1;
+    end else begin
+      data_latch <= 1;
+    end
+  end
+
+  always @(negedge ps2_clk) begin
     // shift in new bit
     if (!ps2_clk) begin
       data <= data << 1;
       data[0] <= ps2_data;
     end
 
-    // set appropriate signal if 11 bits clocked in
-    // bits come in lsb first, so data[8] is lsb
-    if (c1_max_val) begin
-      if (data[9:2] == 8'h55) begin  // 0xAA is actual code, but 0x55 cause of bit ordering
-        reset_required <= 1;
-      end else if (data[9:2] == 8'h0F) begin  // 0xF0
-        release_key <= 1;
-      end else if (data[9:2] == 8'h07) begin  // 0xE0
-        extended_code <= 1;
-      end else begin
-        data_latch <= 1;
-      end
-
-      // else set all output signals to 0
-    end else begin
+    if (!c1_max_val) begin
       reset_required <= 0;
       release_key <= 0;
       extended_code <= 0;
