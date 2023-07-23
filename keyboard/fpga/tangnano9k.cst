@@ -1,11 +1,8 @@
 IO_LOC  "clk" 52;
 IO_PORT "clk" IO_TYPE=LVCMOS33 PULL_MODE=UP;
 
-IO_LOC  "rst" 25;
-IO_PORT "rst" IO_TYPE=LVCMOS33 PULL_MODE=DOWN;
+IO_LOC "ps2_data" 25;
+IO_LOC "ps2_clk" 26;
 
-IO_LOC  "ps2_clk" 84;
-IO_LOC  "ps2_data" 27;
-
-IO_LOC  "ps2_clk_pulldown" 70;
-IO_LOC  "ps2_data_plldown" 40;
+IO_LOC "ps2_data_pulldown" 27;
+IO_LOC "ps2_clk_pulldown" 28;

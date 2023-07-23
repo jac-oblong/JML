@@ -8,60 +8,39 @@
 *          rst will reset the module
 */
 
-module initial_response #(
-    parameter MAX_COUNT = 1,  // number of clk ticks to keep ps2_clk low
-    parameter BIT_WIDTH = 1   // number of bits needed for MAX_COUNT
+module reset_keyboard #(
 ) (
     input reset_required,  // code 0xAA recieved
-    clk,
-    rst,  // reset count to 0
+    input clk,
 
-    output reg ps2_clk_pulldown,
+    output     ps2_clk_pulldown,
     output reg ps2_data_pulldown
 );
 
-  reg                  c1_en;
-  reg                  c1_rst;
-  wire                 c1_max_val;
-  wire [BIT_WIDTH-1:0] c1_count;
+  localparam MAX_COUNT_CLK = 2700;  // 27MHz clk, need ps2 clk held low for 100us
+  localparam MAX_COUNT_DATA = 270;
 
-  counter #(
-      .BIT_WIDTH(BIT_WIDTH),
-      .MAX_VALUE(MAX_COUNT)
-  ) c1 (
-      .en(c1_en),
-      .clk(clk),
-      .rst(c1_rst),
-      .max_val(c1_max_val),
-      .count(c1_count)
-  );
+  reg        counting = 0;
+  reg [11:0] count;
 
-  always @(posedge reset_required) begin
-    // start counting and pull down ps2_clk
-    c1_en <= 1;
-    ps2_clk_pulldown <= 1;
-  end
+  assign ps2_clk_pulldown = counting;
 
   always @(posedge clk) begin
-    // always reset counter if this module is reset
-    c1_rst <= rst;
-    if (rst) begin
-      c1_en <= 0;
-      ps2_clk_pulldown <= 0;
-      ps2_data_pulldown <= 0;
-    end
-
-    if (c1_en) begin
-      // if reached MAX_COUNT, stop counting
-      if (c1_max_val) begin
-        c1_en <= 0;
-        c1_rst <= 1;
-        ps2_clk_pulldown <= 0;
+    // start counting and pull down ps2_clk
+    if (counting) begin
+      count = count + 1;
+      if (count == MAX_COUNT_CLK) begin
+        counting <= 0;
+        count <= 0;
       end
+      if (count == MAX_COUNT_DATA) begin
+        ps2_data_pulldown <= 0;
+      end
+    end else if (reset_required) begin
+      counting <= 1;
+      count <= 0;
+      ps2_data_pulldown <= 1;
     end
-
-    // never want to pull data line low
-    ps2_data_pulldown <= 0;
   end
 
 endmodule
