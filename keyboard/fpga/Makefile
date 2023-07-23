@@ -23,9 +23,18 @@ load: toplevel.fs
 	openFPGALoader -b ${BOARD} toplevel.fs -f
 
 
+# Testing
+receiver_tb.o: receiver.v testbenches/receiver_tb.v
+	iverilog -o receiver_tb.o -s receiver_tb receiver.v testbenches/receiver_tb.v
+
+test: receiver_tb.o
+	vvp receiver_tb.o
+	mv *.vcd ./waveforms
+
+
 # Cleanup build artifacts
-clean: load
+clean:
 	rm toplevel.fs
 
-.PHONY: clean load
-.INTERMEDIATE: toplevel.json toplevel_pnr.json
+.PHONY: clean load test
+.INTERMEDIATE: toplevel.json toplevel_pnr.json receiver_tb.o

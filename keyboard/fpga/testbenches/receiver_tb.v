@@ -7,12 +7,7 @@
 module receiver_tb ();
   reg            ps2_data = 1;
   reg            ps2_clock = 1;
-  reg            rst = 0;
-  wire    [10:0] data;
-  wire           data_latch;
   wire           reset_required;
-  wire           release_key;
-  wire           extended_code;
 
   reg     [0:10] read_data      [0:3];
   integer        i;
@@ -21,18 +16,10 @@ module receiver_tb ();
   receiver #() r (
       .ps2_data(ps2_data),
       .ps2_clk(ps2_clock),
-      .rst(rst),
-      .data(data),
-      .data_latch(data_latch),
-      .reset_required(reset_required),
-      .release_key(release_key),
-      .extended_code(extended_code)
+      .reset_required(reset_required)
   );
 
   initial begin
-    #1 rst = 1;
-    #1 rst = 0;
-
     $readmemb("testbenches/io/receiver_io.txt", read_data);
 
     for (i = 0; i < 4; i = i + 1) begin
