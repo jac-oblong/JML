@@ -17,4 +17,6 @@ module message_decoder (
   reg ctrl = 0;
   reg alt = 0;
 
+  reg [7:0] scancode_to_ascii[256];
+
 endmodule
