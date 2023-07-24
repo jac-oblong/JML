@@ -11,34 +11,34 @@ No *ascii* codes are altered, however, some are ignored. The ignored signals are
 entirely control characters. The full list of ignored characters is below.
 
 ### Ignored Characters
-| Description | Hexadecimal Value   |
-|-------------- | -------------- |
-| Start of Heading | 01 |
-| Start of Text | 02 |
-| End of Text | 03 |
-| End of Transmission | 04 |
-| Enquiry | 05 |
-| Acknowledge | 06 |
-| Bell | 07 |
-| Form Feed | 0C |
-| Shift Out | 0E |
-| Shift In | 0F |
-| Data Link Escape | 10 |
-| Device Control One (XON) | 11 |
-| Device Control Two | 12 |
-| Device Control Three (XOFF) | 13 |
-| Device Control Four | 14 |
-| Negative Acknowledge | 15 |
-| Synchronous Idle | 16 |
-| End of Transmission Block | 17 |
-| Cancel | 18 |
-| End of medium | 19 |
-| Substitute | 1A |
-| Escape | 1B |
-| File Separator | 1C |
-| Group Separator | 1D |
-| Record Separator | 1E |
-| Unit Separator | 1F |
+| Description                 | Hexadecimal Value   |
+|---------------------------- | ------------------- |
+| Start of Heading            |                  01 |
+| Start of Text               |                  02 |
+| End of Text                 |                  03 |
+| End of Transmission         |                  04 |
+| Enquiry                     |                  05 |
+| Acknowledge                 |                  06 |
+| Bell                        |                  07 |
+| Form Feed                   |                  0C |
+| Shift Out                   |                  0E |
+| Shift In                    |                  0F |
+| Data Link Escape            |                  10 |
+| Device Control One (XON)    |                  11 |
+| Device Control Two          |                  12 |
+| Device Control Three (XOFF) |                  13 |
+| Device Control Four         |                  14 |
+| Negative Acknowledge        |                  15 |
+| Synchronous Idle            |                  16 |
+| End of Transmission Block   |                  17 |
+| Cancel                      |                  18 |
+| End of medium               |                  19 |
+| Substitute                  |                  1A |
+| Escape                      |                  1B |
+| File Separator              |                  1C |
+| Group Separator             |                  1D |
+| Record Separator            |                  1E |
+| Unit Separator              |                  1F |
 
 ## Control Characters
 Below is the table of control characters added in addition to the normal *ascii*
