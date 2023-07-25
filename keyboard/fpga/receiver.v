@@ -7,20 +7,14 @@ module receiver (
     input ps2_data,
     input ps2_clk,
 
-    output       reset_required,  // when 0xAA received
-    output       release_key,     // when 0xF0 received
-    output       extended_code,   // when 0xE0 received
     output [7:0] data_out,
-    output       data_valid       // when 11 bits read in
+    output       data_valid  // when 11 bits read in
 );
 
   reg [10:0] data = 0;
   reg [ 4:0] count = 0;
 
-  assign reset_required = (data == 11'b00101010111 && count == 11);
-  assign release_key = (data == 11'b00000111111 && count == 11);
-  assign extended_code = (data == 11'b00000011101 && count == 11);
-  assign data_valid = (count == 11);
+  assign data_valid  = (count == 11);
 
   // data has lsb at [9] and msb at [2], need to swap that for data_out
   assign data_out[0] = data[9];
