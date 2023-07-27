@@ -10,6 +10,12 @@ a **Z80 CPU**.
 
 More details: [Arduino Z80 Debugger](arduino-debugger).
 
+## Arduino RAM Tester
+This is a small Arduino-based project designed to test whether or not a ram IC
+is working. The tests are very basic and not at all comprehensive.
+
+More details: [Arduino RAM Tester](ram-tester).
+
 <!--
 ## Text Editor
 This is a very simplistic text editor designed to be run on a **jml** computer.
