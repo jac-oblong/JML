@@ -171,6 +171,9 @@ void setup() {
   digitalWrite(WE, WE_active_low);
   digitalWrite(OE, !OE_active_low);
   cmp_data = 0b10101010;
+  if (word_size == 4) {
+    cmp_data &= 0x0F;
+  }
   for (int i = 0; i < ram_size; i++) {
     set_addr(i);
     delay(2);
@@ -196,6 +199,9 @@ void setup() {
   digitalWrite(WE, WE_active_low);
   digitalWrite(OE, !OE_active_low);
   cmp_data = 0b01010101;
+  if (word_size == 4) {
+    cmp_data &= 0x0F;
+  }
   for (int i = 0; i < ram_size; i++) {
     set_addr(i);
     delay(2);
