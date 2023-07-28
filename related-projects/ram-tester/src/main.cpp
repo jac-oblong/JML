@@ -39,7 +39,7 @@ void write_0xAA();
 void write_0x55();
 void write_address();
 void set_addr(long mem);
-void set_data(long data);
+void set_data(uint8_t data);
 uint8_t get_data();
 
 void setup() {
@@ -113,17 +113,17 @@ void setup() {
   digitalWrite(WE, WE_active_low);
   digitalWrite(OE, OE_active_low);
 
-  Serial.print("\nWriting all ones...");
-  write_all_ones();
+  Serial.print("\nWriting all zeros...");
+  write_all_zeros();
   Serial.println("Complete");
   Serial.println("Checking data...");
   change_data_dir(true);
   digitalWrite(WE, WE_active_low);
   digitalWrite(OE, !OE_active_low);
-  uint8_t cmp_data = word_size == 8 ? 0b11111111 : 0b00001111;
+  uint8_t cmp_data = 0b00000000;
   for (int i = 0; i < ram_size; i++) {
     set_addr(i);
-    delay(2);
+    delayMicroseconds(50);
     uint8_t data = (word_size == 4) ? get_data() & 0x0F : get_data();
     if (data != cmp_data) {
       Serial.print("ERROR: addr ");
@@ -138,17 +138,17 @@ void setup() {
 
   digitalWrite(OE, OE_active_low);
 
-  Serial.print("Writing all zeros...");
-  write_all_zeros();
+  Serial.print("Writing all ones...");
+  write_all_ones();
   Serial.println("Complete");
   Serial.println("Checking data...");
   change_data_dir(true);
   digitalWrite(WE, WE_active_low);
   digitalWrite(OE, !OE_active_low);
-  cmp_data = 0b00000000;
+  cmp_data = word_size == 8 ? 0b11111111 : 0b00001111;
   for (int i = 0; i < ram_size; i++) {
     set_addr(i);
-    delay(2);
+    delayMicroseconds(50);
     uint8_t data = (word_size == 4) ? get_data() & 0x0F : get_data();
     if (data != cmp_data) {
       Serial.print("ERROR: addr ");
@@ -176,8 +176,8 @@ void setup() {
   }
   for (int i = 0; i < ram_size; i++) {
     set_addr(i);
-    delay(2);
-    uint8_t data = (word_size == 4) ? get_data() & 0x0F : get_data();
+    delayMicroseconds(50);
+    uint8_t data = get_data();
     if (data != cmp_data) {
       Serial.print("ERROR: addr ");
       Serial.print(i, HEX);
@@ -204,7 +204,7 @@ void setup() {
   }
   for (int i = 0; i < ram_size; i++) {
     set_addr(i);
-    delay(2);
+    delayMicroseconds(50);
     uint8_t data = (word_size == 4) ? get_data() & 0x0F : get_data();
     if (data != cmp_data) {
       Serial.print("ERROR: addr ");
@@ -218,29 +218,6 @@ void setup() {
   Serial.println("Complete\n");
 
   digitalWrite(OE, OE_active_low);
-
-  Serial.print("Writing address...");
-  write_address();
-  Serial.println("Complete");
-  Serial.println("Checking data...");
-  change_data_dir(true);
-  digitalWrite(WE, WE_active_low);
-  digitalWrite(OE, !OE_active_low);
-  for (int i = 0; i < ram_size; i++) {
-    set_addr(i);
-    delay(2);
-    uint8_t data = (word_size == 4) ? get_data() & 0x0F : get_data();
-    uint8_t expected = (word_size == 4) ? ((uint8_t)i) & 0x0F : (uint8_t)i;
-    if (data != expected) {
-      Serial.print("ERROR: addr ");
-      Serial.print(i, HEX);
-      Serial.print(" expected ");
-      Serial.print(expected, HEX);
-      Serial.print(" got ");
-      Serial.println(data, HEX);
-    }
-  }
-  Serial.println("Complete\n");
 }
 
 void loop() {}
@@ -273,14 +250,14 @@ void write_all_ones() {
   uint8_t data = 0b11111111;
   for (int i = 0; i < ram_size; i++) {
     set_addr(i);
-    delay(2);
+    delayMicroseconds(50);
     digitalWrite(WE, !WE_active_low);
-    delay(2);
+    delayMicroseconds(50);
     change_data_dir(false);
     set_data(data);
-    delay(2);
+    delayMicroseconds(50);
     digitalWrite(WE, WE_active_low);
-    delay(2);
+    delayMicroseconds(50);
     change_data_dir(true);
   }
 }
@@ -289,14 +266,14 @@ void write_all_zeros() {
   uint8_t data = 0b00000000;
   for (int i = 0; i < ram_size; i++) {
     set_addr(i);
-    delay(2);
+    delayMicroseconds(50);
     digitalWrite(WE, !WE_active_low);
-    delay(2);
+    delayMicroseconds(50);
     change_data_dir(false);
     set_data(data);
-    delay(2);
+    delayMicroseconds(50);
     digitalWrite(WE, WE_active_low);
-    delay(2);
+    delayMicroseconds(50);
     change_data_dir(true);
   }
 }
@@ -305,45 +282,31 @@ void write_0xAA() {
   uint8_t data = 0b10101010;
   for (int i = 0; i < ram_size; i++) {
     set_addr(i);
-    delay(2);
+    delayMicroseconds(50);
     digitalWrite(WE, !WE_active_low);
-    delay(2);
+    delayMicroseconds(50);
     change_data_dir(false);
     set_data(data);
-    delay(2);
+    delayMicroseconds(50);
     digitalWrite(WE, WE_active_low);
-    delay(2);
+    delayMicroseconds(50);
     change_data_dir(true);
+    delayMicroseconds(50);
   }
 }
 
 void write_0x55() {
-  uint8_t data = 0b10101010;
+  uint8_t data = 0b01010101;
   for (int i = 0; i < ram_size; i++) {
     set_addr(i);
-    delay(2);
+    delayMicroseconds(50);
     digitalWrite(WE, !WE_active_low);
-    delay(2);
+    delayMicroseconds(50);
     change_data_dir(false);
     set_data(data);
-    delay(2);
+    delayMicroseconds(50);
     digitalWrite(WE, WE_active_low);
-    delay(2);
-    change_data_dir(true);
-  }
-}
-
-void write_address() {
-  for (int i = 0; i < ram_size; i++) {
-    set_addr(i);
-    delay(2);
-    digitalWrite(WE, !WE_active_low);
-    delay(2);
-    change_data_dir(false);
-    set_data((uint8_t)i);
-    delay(2);
-    digitalWrite(WE, WE_active_low);
-    delay(2);
+    delayMicroseconds(50);
     change_data_dir(true);
   }
 }
@@ -355,7 +318,7 @@ void set_addr(long mem) {
   }
 }
 
-void set_data(long data) {
+void set_data(uint8_t data) {
   uint8_t modData = data;
   for (int i = 23; i <= 37; i += 2) {
     if ((modData & 0x01) != 0) {
@@ -374,7 +337,7 @@ uint8_t get_data() {
     if (digitalRead(i)) {
       data |= 0x01;
     } else {
-      data &= 0x00;
+      data &= 0xFE;
     }
   }
   return data;
