@@ -177,7 +177,7 @@ void setup() {
   for (int i = 0; i < ram_size; i++) {
     set_addr(i);
     delayMicroseconds(50);
-    uint8_t data = get_data();
+    uint8_t data = (word_size == 4) ? get_data() & 0x0F : get_data();
     if (data != cmp_data) {
       Serial.print("ERROR: addr ");
       Serial.print(i, HEX);
