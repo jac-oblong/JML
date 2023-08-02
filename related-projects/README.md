@@ -4,6 +4,8 @@ project. These additional projects may be specific programs written for the **jm
 computers, add-ons to the computers, or entirely separate projects that were
 useful in the development of the **jml** computers.
 
+These projects do not occur in any particular order.
+
 ## Arduino Z80 Debugger
 This is a small Arduino-based project designed to capture output signals from 
 a **Z80 CPU**. 
@@ -15,6 +17,12 @@ This is a small Arduino-based project designed to test whether or not a ram IC
 is working. The tests are very basic and not at all comprehensive.
 
 More details: [Arduino RAM Tester](ram-tester).
+
+## Arduino ROM Reader
+This is a small Arduino-based project designed to read the contents of a ROM IC
+and print it to a Serial monitor.
+
+More details: [Arduino ROM Reader](rom-reader).
 
 <!--
 ## Text Editor
