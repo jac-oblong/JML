@@ -1,0 +1,39 @@
+* jml Related Projects
+This directory contains additional projects that are related to the *jml*
+project. These additional projects may be specific programs written for the *jml*
+computers, addons to the computers, or entirely separate projects that were
+useful in the development of the *jml* computers.
+
+These projects do not occur in any particular order.
+
+** Arduino Z80 Debugger
+This is a small Arduino-based project designed to capture output signals from 
+a *Z80 CPU*
+
+More details: [[arduino-debugger][Arduino Z80 Debugger]].
+
+** Arduino RAM Tester
+This is a small Arduino-based project designed to test whether or not a ram IC
+is working. The tests are very basic and not at all comprehensive.
+
+More details: [[ram-tester][Arduino RAM Tester]].
+
+** Arduino ROM Utilities
+This is a "family" of utilities designed for the AT28C64B and compatible
+EEPROMs. It includes a reader and programmer.
+
+Schematics can be found in the directory linked at the bottom of this section.
+
+In addition to the Arduino code, there is a [[][program]] run on a computer
+(only Linux computers have been tested at this time, and the program was not
+designed with other operating systems in mind). This allows for sending data
+to the Arduino board over the serial port in order to program the EEPROM.
+
+More details: [[rom-utilities][Arduino ROM Utilities]].
+
+# ** Text Editor
+# This is a very simplistic text editor designed to be run on a *jml* computer.
+# While it can, in theory, be run on a *jml-8*, it would not be useful, as there
+# is no memory. As such, it is really meant for the *jml-8+* computer.
+#
+# More details: [[https://github.com/jac-oblong/text-editor][Text Editor]]
