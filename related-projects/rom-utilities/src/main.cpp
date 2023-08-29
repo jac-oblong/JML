@@ -76,6 +76,9 @@ void loop() {
   **
   ** Addresses will wrap for all operations (i.e. if address 0x1FFF is reached,
   ** the next address will be 0x0000)
+  **
+  ** Once an operation has been completed, 0xFF will be written to the serial
+  ** port to signify that it is ready for another operation.
   */
   while (Serial.available() < 3) {
   }
@@ -130,6 +133,8 @@ void loop() {
   setup_pins(true);
 
   delayMicroseconds(50);
+
+  Serial.write(0xFF);
 }
 
 void setup_pins(bool direction) {
