@@ -11,13 +11,13 @@ const int OE = 48;
 const int WE = 50;
 const int CS = 52;
 
-// addr pins are the even numbered pins between ADDR0 and ADDR12
-const int ADDR0 = 22;
+// addr pins are the pins between ADDR0 and ADDR12
+const int ADDR0 = 34;
 const int ADDR12 = 46;
 
 // data pins are all pins between DATA0 and DATA7
-const int DATA0 = 2;
-const int DATA7 = 9;
+const int DATA0 = 22;
+const int DATA7 = 29;
 
 const int OP_SIZE = 16;
 
@@ -48,7 +48,7 @@ void setup() {
   pinMode(WE, OUTPUT);
   pinMode(CS, OUTPUT);
 
-  for (int i = ADDR0; i < ADDR12; i += 2) {
+  for (int i = ADDR0; i < ADDR12; i++) {
     pinMode(i, OUTPUT);
   }
 
@@ -148,7 +148,7 @@ void setup_pins(bool direction) {
 }
 
 void set_addr(uint16_t mem) {
-  for (int i = ADDR0; i <= ADDR12; i += 2) {
+  for (int i = ADDR0; i <= ADDR12; i++) {
     digitalWrite(i, mem & 1);
     mem = mem >> 1;
   }
@@ -167,7 +167,7 @@ void set_data(uint8_t data) {
 
 uint8_t get_data() {
   uint8_t data = 0;
-  for (int i = 37; i >= 23; i -= 2) {
+  for (int i = DATA7; i >= DATA0; i--) {
     data = data << 1;
     if (digitalRead(i)) {
       data |= 0x01;
