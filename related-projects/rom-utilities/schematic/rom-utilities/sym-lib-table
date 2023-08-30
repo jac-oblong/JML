@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "AT28C64B_Library")(type "KiCad")(uri "${KIPRJMOD}/AT28C64B_Library.kicad_sym")(options "")(descr ""))
+)
