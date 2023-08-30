@@ -8,8 +8,8 @@
 #include <Arduino.h>
 
 const int OE = 48;
-const int WE = 50;
-const int CS = 52;
+const int CS = 50;
+const int WE = 52;
 
 // addr pins are the pins between ADDR0 and ADDR12
 const int ADDR0 = 34;
@@ -53,6 +53,17 @@ void setup() {
   }
 
   setup_pins(false);
+
+  /*
+  ** when first connecting Arduino to computer, the computer will send a value
+  ** and the Arduino verifies itself by sending the same value, but with all
+  ** bits flipped
+  */
+  while (Serial.available() == 0) {
+  }
+  uint8_t b = Serial.read();
+  b = ~b;
+  Serial.write(b);
 }
 
 void loop() {

@@ -6,5 +6,5 @@ reading and programming the EEPROM.
 An Arduino Mega is used to interface with the EEPROM, and schematics can be
 found in the folder of the same name. KiCad was used for the schematics.
 
-This [[program][]] allows for a friendlier interface to the Arduino. It has
+This [[../rom-utilities-ui][program]] allows for a friendlier interface to the Arduino. It has
 only been tested on a Linux machine, so may not work on other operating systems.
