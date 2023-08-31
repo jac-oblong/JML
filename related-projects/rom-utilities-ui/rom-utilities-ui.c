@@ -198,7 +198,47 @@ void read_to_file(char *filename, int serial_fd) {
   close(fd);
 }
 
-void write_from_file(char *filename, int serial_fd) {}
+void write_from_file(char *filename, int serial_fd) {
+  // open the file
+  int fd = open(filename, O_RDONLY);
+  if (fd < 0) {
+    perror("failed to open file to write into EEPROM");
+    return;
+  }
+
+  uint16_t address = 0;
+  while (address < EEPROM_SIZE) {
+    // tell Arduino we want to write
+    uint8_t read_op = 0x01;
+    write(serial_fd, &read_op, sizeof(read_op));
+
+    // send address to read from
+    uint8_t high_byte = address >> 8;
+    uint8_t low_byte = address;
+    write(serial_fd, &high_byte, sizeof(high_byte));
+    write(serial_fd, &low_byte, sizeof(low_byte));
+
+    // read from file
+    uint8_t buf[16];
+    int n = read(fd, buf, 16);
+    if (n < 0) {
+      perror("reading from file failed");
+      break;
+    }
+    // fill in any missing data
+    for (int i = n; i < 16; i++) {
+      buf[i] = 0x00;
+    }
+
+    // send to Arduino
+    write(serial_fd, buf, 16);
+
+    // increment address
+    address += 16;
+  }
+
+  close(fd);
+}
 
 int strcmpcaseins(char *str1, char *str2) {
   if (strlen(str1) != strlen(str2)) {
