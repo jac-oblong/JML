@@ -191,6 +191,28 @@ void read_to_file(char *filename, int serial_fd) {
             buf[15]);
     write(fd, line, strlen(line));
 
+    // wait for Arduino to tell us we are done
+    num_nonresponsive = 0;
+    uint8_t msg;
+    while (1) {
+      int n = read(serial_fd, &msg, sizeof(uint8_t));
+      if (n == 0) {
+        num_nonresponsive++;
+      }
+      if (n == 1 && msg == 0xFF) {
+        break;
+      }
+      if (num_nonresponsive == 25) {
+        // 25 sec with no response
+        fprintf(stderr, "Arduino is not responding, exiting\n");
+        should_exit = 1;
+        break;
+      }
+    }
+    if (should_exit == 1) {
+      break;
+    }
+
     // increment address
     address += 16;
   }
@@ -232,6 +254,29 @@ void write_from_file(char *filename, int serial_fd) {
 
     // send to Arduino
     write(serial_fd, buf, 16);
+
+    // wait for Arduino to respond
+    int num_nonresponsive = 0;
+    int should_exit = 0;
+    uint8_t msg;
+    while (1) {
+      int n = read(serial_fd, &msg, sizeof(uint8_t));
+      if (n == 0) {
+        num_nonresponsive++;
+      }
+      if (n == 1 && msg == 0xFF) {
+        break;
+      }
+      if (num_nonresponsive == 25) {
+        // 25 sec with no response
+        fprintf(stderr, "Arduino is not responding, exiting\n");
+        should_exit = 1;
+        break;
+      }
+    }
+    if (should_exit == 1) {
+      break;
+    }
 
     // increment address
     address += 16;
