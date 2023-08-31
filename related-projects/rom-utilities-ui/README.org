@@ -12,15 +12,11 @@ The program will first prompt the user for the path to the connected Arduino.
 Once connection with the Arduino has been confirmed, the user will be prompted
 with a command.
 
-There are four commands which can be given, all of which can be lower or upper
+There are three commands which can be given, all of which can be lower or upper
 case:
 
- - RF: will prompt user for name of file and then read contents of EEPROM into
+ - R: will prompt user for name of file and then read contents of EEPROM into
    that file
- - R: will print out contents of EEPROM
- - WF: will prompt user for name of file and then write contents of file to the
+ - W: will prompt user for name of file and then write contents of file to the
    EEPROM
- - W: will prompt user for starting address (in hexadecimal), will then prompt
-   user for data (in hexadecimal) which will be written to EEPROM, then address
-   will be incremented and user will be prompted for data again, entering a value
-   that cannot be interpreted as hexadecimal will exit the command
+ - Q: quit the program
