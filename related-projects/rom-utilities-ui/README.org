@@ -18,5 +18,6 @@ case:
  - R: will prompt user for name of file and then read contents of EEPROM into
    that file
  - W: will prompt user for name of file and then write contents of file to the
-   EEPROM
+   EEPROM, if the size of the file does not match the size of the EEPROM (8192)
+   bytes, the remaining data will be programmed with 0x00
  - Q: quit the program
