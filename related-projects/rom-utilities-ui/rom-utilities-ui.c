@@ -85,15 +85,24 @@ int main() {
     perror("write() to serial port failed");
     return EXIT_FAILURE;
   }
-  if (read(serial_port, &msg, sizeof(msg)) != 1) {
-    perror("read() from serial port failed");
-    return EXIT_FAILURE;
+  int n = 0;
+  while (n == 0) {
+    n = read(serial_port, &msg, sizeof(msg));
+    if (n < 0) {
+      perror("read() from serial port failed");
+      return EXIT_FAILURE;
+    }
+    printf(".");
+    fflush(stdout);
   }
   if (msg != 0x55) {
-    fprintf(stderr,
-            "connection with Arduino not confirmed, received wrong code");
+    fprintf(
+        stderr,
+        "connection with Arduino not confirmed, received wrong code (0x%X)\n",
+        msg);
     return EXIT_FAILURE;
   }
+  printf("Connection Verified\n");
 
   printf("\n");
   while (1) {
@@ -215,6 +224,9 @@ void read_to_file(char *filename, int serial_fd) {
 
     // increment address
     address += 16;
+
+    printf("#");
+    fflush(stdout);
   }
 
   close(fd);
@@ -280,6 +292,9 @@ void write_from_file(char *filename, int serial_fd) {
 
     // increment address
     address += 16;
+
+    printf("#");
+    fflush(stdout);
   }
 
   close(fd);
@@ -306,7 +321,7 @@ void read_input(char **buf) {
     exit(EXIT_FAILURE);
   }
   // if full path not obtained, continue getting more
-  while (*buf[strlen(*buf) - 1] != '\n') {
+  while ((*buf)[strlen(*buf) - 1] != '\n') {
     *buf = realloc(*buf, strlen(*buf) + 256);
     if (!fgets(*buf + strlen(*buf), 256, stdin)) {
       fprintf(stderr, "reading user input failed\n");
@@ -314,5 +329,5 @@ void read_input(char **buf) {
       exit(EXIT_FAILURE);
     }
   }
-  *buf[strlen(*buf) - 1] = '\0';
+  (*buf)[strlen(*buf) - 1] = '\0';
 }

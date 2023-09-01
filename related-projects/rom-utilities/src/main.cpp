@@ -62,8 +62,8 @@ void setup() {
   while (Serial.available() == 0) {
   }
   uint8_t b = Serial.read();
-  b = ~b;
-  Serial.write(b);
+  b = 0x80;
+  Serial.print(b);
 }
 
 void loop() {
@@ -109,7 +109,7 @@ void loop() {
     for (int i = 0; i < OP_SIZE; i++) {
       set_addr(addr + i);
       delayMicroseconds(1);
-      Serial.write(get_data());
+      Serial.print(get_data());
     }
 
   } else if (rw == 0x01) {
@@ -145,7 +145,7 @@ void loop() {
 
   delayMicroseconds(50);
 
-  Serial.write(0xFF);
+  Serial.print(0xFF);
 }
 
 void setup_pins(bool direction) {
