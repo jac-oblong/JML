@@ -7,9 +7,9 @@
 #include "Stream.h"
 #include <Arduino.h>
 
-const int OE = 48;
+const int OE = 52;
 const int CS = 50;
-const int WE = 52;
+const int WE = 48;
 
 // addr pins are the pins between ADDR0 and ADDR12
 const int ADDR0 = 34;
