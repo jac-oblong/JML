@@ -6,5 +6,8 @@ reading and programming the EEPROM.
 An Arduino Mega is used to interface with the EEPROM, and schematics can be
 found in the folder of the same name. KiCad was used for the schematics.
 
-This [[../rom-utilities-ui][program]] allows for a friendlier interface to the Arduino. It has
-only been tested on a Linux machine, so may not work on other operating systems.
+NOTE: HIGH on the Arduino Mega is considered to be above 5V, however, the
+AT28C64 EEPROM considers HIGH to be above 2.4V. This can cause problems
+when reading from the EEPROM. While this program does allow for reading
+from the EEPROM, it was primarily designed for writing, using a different
+micro-controller (or using the analog inputs) can solve this problem.
