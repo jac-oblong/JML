@@ -62,8 +62,8 @@ void setup() {
   while (Serial.available() == 0) {
   }
   uint8_t b = Serial.read();
-  b = 0x80;
-  Serial.print(b);
+  b = ~b;
+  Serial.write(b);
 }
 
 void loop() {
@@ -102,14 +102,17 @@ void loop() {
     // read contents of EEPROM
     digitalWrite(CS, HIGH);
     digitalWrite(WE, HIGH);
+    digitalWrite(OE, HIGH);
     setup_pins(true);
-    digitalWrite(CS, LOW);
-    digitalWrite(OE, LOW);
 
     for (int i = 0; i < OP_SIZE; i++) {
       set_addr(addr + i);
+      digitalWrite(CS, LOW);
+      digitalWrite(OE, LOW);
       delayMicroseconds(1);
-      Serial.print(get_data());
+      Serial.write(get_data());
+      digitalWrite(CS, HIGH);
+      digitalWrite(OE, HIGH);
     }
 
   } else if (rw == 0x01) {
@@ -118,7 +121,6 @@ void loop() {
     digitalWrite(OE, HIGH);
     digitalWrite(CS, HIGH);
     setup_pins(false);
-    digitalWrite(CS, LOW);
 
     for (int i = 0; i < OP_SIZE; i++) {
       set_addr(addr + i);
@@ -128,14 +130,12 @@ void loop() {
       uint8_t data = Serial.read();
       set_data(data);
 
+      digitalWrite(CS, LOW);
       digitalWrite(WE, LOW);
       delayMicroseconds(1);
       digitalWrite(WE, HIGH);
+      digitalWrite(CS, HIGH);
     }
-
-  } else {
-    Serial.print("Unrecognized code: ");
-    Serial.println(rw, HEX);
   }
 
   digitalWrite(OE, HIGH);
@@ -145,7 +145,7 @@ void loop() {
 
   delayMicroseconds(50);
 
-  Serial.print(0xFF);
+  Serial.write(0xFF);
 }
 
 void setup_pins(bool direction) {

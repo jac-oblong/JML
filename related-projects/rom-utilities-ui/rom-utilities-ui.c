@@ -29,7 +29,7 @@ int main() {
   read_input(&filename);
 
   // open user provided file
-  int serial_port = open(filename, O_RDWR);
+  int serial_port = open(filename, O_RDWR | O_NOCTTY);
   if (serial_port < 0) {
     perror("open() failed on file");
     free(filename);
@@ -77,6 +77,7 @@ int main() {
     perror("setting configuration failed");
     return EXIT_FAILURE;
   }
+  usleep(3000 * 1000); // give serial time to set up
 
   // ensuring that Ardiuno is responsive, write any byte, should receive same
   // data with all bits flipped
@@ -106,7 +107,7 @@ int main() {
 
   printf("\n");
   while (1) {
-    printf("> ");
+    printf("\n> ");
 
     char buf[16];
     if (!fgets(buf, 16, stdin)) {
@@ -114,19 +115,21 @@ int main() {
       return EXIT_FAILURE;
     }
 
-    if (strcmpcaseins(buf, "R\n")) {
+    if (strcmpcaseins(buf, "R\n") == 0) {
+      printf("Enter name of file to read into => ");
       char *file = calloc(256, sizeof(char));
       read_input(&file);
       read_to_file(file, serial_port);
       free(file);
 
-    } else if (strcmpcaseins(buf, "W\n")) {
+    } else if (strcmpcaseins(buf, "W\n") == 0) {
+      printf("Enter name of file to write from => ");
       char *file = calloc(256, sizeof(char));
       read_input(&file);
       write_from_file(file, serial_port);
       free(file);
 
-    } else if (strcmpcaseins(buf, "Q\n")) {
+    } else if (strcmpcaseins(buf, "Q\n") == 0) {
       break;
 
     } else {
@@ -142,7 +145,7 @@ int main() {
 
 void read_to_file(char *filename, int serial_fd) {
   // open the file
-  int fd = open(filename, O_WRONLY | O_CREAT | O_EXCL);
+  int fd = open(filename, O_WRONLY | O_CREAT, 0644);
   if (fd < 0) {
     perror("failed to open file to read EEPROM into");
     return;
@@ -243,8 +246,8 @@ void write_from_file(char *filename, int serial_fd) {
   uint16_t address = 0;
   while (address < EEPROM_SIZE) {
     // tell Arduino we want to write
-    uint8_t read_op = 0x01;
-    write(serial_fd, &read_op, sizeof(read_op));
+    uint8_t write_op = 0x01;
+    write(serial_fd, &write_op, sizeof(write_op));
 
     // send address to read from
     uint8_t high_byte = address >> 8;
