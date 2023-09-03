@@ -123,6 +123,7 @@ void loop() {
     setup_pins(false);
 
     for (int i = 0; i < OP_SIZE; i++) {
+      digitalWrite(OE, HIGH);
       set_addr(addr + i);
 
       while (Serial.available() == 0) {
@@ -135,6 +136,7 @@ void loop() {
       delayMicroseconds(1);
       digitalWrite(WE, HIGH);
       digitalWrite(CS, HIGH);
+      digitalWrite(OE, LOW);
     }
   }
 
