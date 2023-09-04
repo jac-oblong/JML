@@ -28,5 +28,5 @@ programming the EEPROMs used in the *jml* computers.
 # This is a very simplistic text editor designed to be run on a *jml* computer.
 # While it can, in theory, be run on a *jml-8*, it would not be useful, as there
 # is no memory. As such, it is really meant for the *jml-8+* computer.
-#
+
 # More details: [[https://github.com/jac-oblong/text-editor][Text Editor]]
