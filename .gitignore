@@ -2,3 +2,5 @@ programs/**
 !programs/README.md
 **/*.out
 **/*.bin
+related-projects/AT28C-EEPROM-Programmer-Arduino
+related-projects/AT28C-EEPROM-Programmer-Arduino/**

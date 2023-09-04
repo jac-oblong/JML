@@ -1,8 +1,9 @@
 * jml Related Projects
-This directory contains additional projects that are related to the *jml*
-project. These additional projects may be specific programs written for the *jml*
-computers, addons to the computers, or entirely separate projects that were
-useful in the development of the *jml* computers.
+This directory contains projects that were helpful in developing the *jml*
+line of computers as well as "add-on" projects specifically designed for
+the *jml* computers. Not all projects were done by me; those projects will
+be linked. If they were developed by me, all code, etc. will be in this
+directory.
 
 These projects do not occur in any particular order.
 
@@ -18,18 +19,10 @@ is working. The tests are very basic and not at all comprehensive.
 
 More details: [[./ram-tester][Arduino RAM Tester]].
 
-** Arduino ROM Utilities
-This is a "family" of utilities designed for the AT28C64B and compatible
-EEPROMs. It includes a reader and programmer.
+** AT28C EEPROM Programmer for Arduino Mega
+This [[https://github.com/crmaykish/AT28C-EEPROM-Programmer-Arduino.git][project]] was created by *crmaykish* on GitHub. It was very useful for
+programming the EEPROMs used in the *jml* computers.
 
-Schematics can be found in the directory linked at the bottom of this section.
-
-In addition to the Arduino code, there is a [[./rom-utilities-ui][program]] run on a computer
-(only Linux computers have been tested at this time, and the program was not
-designed with other operating systems in mind). This allows for sending data
-to the Arduino board over the serial port in order to program the EEPROM.
-
-More details: [[./rom-utilities][Arduino ROM Utilities]].
 
 # ** Text Editor
 # This is a very simplistic text editor designed to be run on a *jml* computer.
