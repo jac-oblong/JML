@@ -4,5 +4,5 @@ programs/**
 **/*.bin
 related-projects/AT28C-EEPROM-Programmer-Arduino
 related-projects/AT28C-EEPROM-Programmer-Arduino/**
-docs/datasheets
-docs/datasheets/**
+docs/datasheet
+docs/datasheet/**
