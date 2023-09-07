@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "jml-8-mini-library")(type "KiCad")(uri "${KIPRJMOD}/jml-8-mini-library.kicad_sym")(options "")(descr ""))
+)
