@@ -1,0 +1,15 @@
+(kicad_sch (version 20230121) (generator eeschema)
+
+  (uuid a42450b8-eb61-45cf-8b47-3ccd90148eb2)
+
+  (paper "A4")
+
+  (lib_symbols
+  )
+
+
+  (text "RESET" (at 86.36 114.3 0)
+    (effects (font (size 3.5 3.5) bold) (justify left bottom))
+    (uuid f0015d99-1580-4f97-9fc0-57d7eed405f0)
+  )
+)

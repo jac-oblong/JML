@@ -1,0 +1,15 @@
+(kicad_sch (version 20230121) (generator eeschema)
+
+  (uuid c361d47a-1644-482e-8530-35cf38aa2293)
+
+  (paper "A4")
+
+  (lib_symbols
+  )
+
+
+  (text "CLOCK" (at 83.82 78.74 0)
+    (effects (font (size 3.5 3.5) (thickness 0.7) bold) (justify left bottom))
+    (uuid 19cb80ba-8f22-4ef2-ac0f-836a6b6299f3)
+  )
+)
