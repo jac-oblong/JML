@@ -10,7 +10,10 @@ loop_outer:
   LD C, 0xFF
 loop_inner:
   DEC C
-  JR loop_inner
+  JR NZ, loop_inner
 
   DEC B
-  JR loop_outer
+  JR NZ, loop_outer
+
+  ;; halt to bring pin low
+  HALT
