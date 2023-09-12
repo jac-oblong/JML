@@ -1,19 +1,21 @@
   ;; 'OS' for the jml-8 mini computer
+  ;; currently just tests RAM (0x8000 - 0xFFFF)
 
 org 0x0000
 
-  ;;
-  ;; Stall for a while
-  ;;
-  LD B, 0xFF
-loop_outer:
-  LD C, 0xFF
-loop_inner:
-  DEC C
-  JR NZ, loop_inner
+  LD B, 0x00                    ; value with which to test RAM
+outer_loop:
+  LD (HL), 0x8000               ; start at upper address of memory
 
-  DEC B
-  JR NZ, loop_outer
+inner_loop:
+  LD (HL), B                    ; store value in memory
+  LD A, (HL)                    ; retrieve value from mem
+  ;; THIS IS WHERE 'CP B' and 'JP NZ, ...' would go when testing
 
-  ;; halt to bring pin low
-  HALT
+  INC (HL)                      ; go to next location
+  JR NZ, inner_loop
+
+  INC B                         ; go to next value for test if B NZ
+  JR NZ, outer_loop
+
+  HALT                          ; stop running
