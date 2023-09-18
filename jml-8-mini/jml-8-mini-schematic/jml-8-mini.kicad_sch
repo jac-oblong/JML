@@ -1128,6 +1128,58 @@
         )
       )
     )
+    (symbol "power:+5V" (power) (pin_names (offset 0)) (in_bom yes) (on_board yes)
+      (property "Reference" "#PWR" (at 0 -3.81 0)
+        (effects (font (size 1.27 1.27)) hide)
+      )
+      (property "Value" "+5V" (at 0 3.556 0)
+        (effects (font (size 1.27 1.27)))
+      )
+      (property "Footprint" "" (at 0 0 0)
+        (effects (font (size 1.27 1.27)) hide)
+      )
+      (property "Datasheet" "" (at 0 0 0)
+        (effects (font (size 1.27 1.27)) hide)
+      )
+      (property "ki_keywords" "global power" (at 0 0 0)
+        (effects (font (size 1.27 1.27)) hide)
+      )
+      (property "ki_description" "Power symbol creates a global label with name \"+5V\"" (at 0 0 0)
+        (effects (font (size 1.27 1.27)) hide)
+      )
+      (symbol "+5V_0_1"
+        (polyline
+          (pts
+            (xy -0.762 1.27)
+            (xy 0 2.54)
+          )
+          (stroke (width 0) (type default))
+          (fill (type none))
+        )
+        (polyline
+          (pts
+            (xy 0 0)
+            (xy 0 2.54)
+          )
+          (stroke (width 0) (type default))
+          (fill (type none))
+        )
+        (polyline
+          (pts
+            (xy 0 2.54)
+            (xy 0.762 1.27)
+          )
+          (stroke (width 0) (type default))
+          (fill (type none))
+        )
+      )
+      (symbol "+5V_1_1"
+        (pin power_in line (at 0 0 90) (length 0) hide
+          (name "+5V" (effects (font (size 1.27 1.27))))
+          (number "1" (effects (font (size 1.27 1.27))))
+        )
+      )
+    )
     (symbol "power:GND" (power) (pin_names (offset 0)) (in_bom yes) (on_board yes)
       (property "Reference" "#PWR" (at 0 -6.35 0)
         (effects (font (size 1.27 1.27)) hide)
@@ -1208,58 +1260,6 @@
         )
       )
     )
-    (symbol "power:VCC" (power) (pin_names (offset 0)) (in_bom yes) (on_board yes)
-      (property "Reference" "#PWR" (at 0 -3.81 0)
-        (effects (font (size 1.27 1.27)) hide)
-      )
-      (property "Value" "VCC" (at 0 3.81 0)
-        (effects (font (size 1.27 1.27)))
-      )
-      (property "Footprint" "" (at 0 0 0)
-        (effects (font (size 1.27 1.27)) hide)
-      )
-      (property "Datasheet" "" (at 0 0 0)
-        (effects (font (size 1.27 1.27)) hide)
-      )
-      (property "ki_keywords" "global power" (at 0 0 0)
-        (effects (font (size 1.27 1.27)) hide)
-      )
-      (property "ki_description" "Power symbol creates a global label with name \"VCC\"" (at 0 0 0)
-        (effects (font (size 1.27 1.27)) hide)
-      )
-      (symbol "VCC_0_1"
-        (polyline
-          (pts
-            (xy -0.762 1.27)
-            (xy 0 2.54)
-          )
-          (stroke (width 0) (type default))
-          (fill (type none))
-        )
-        (polyline
-          (pts
-            (xy 0 0)
-            (xy 0 2.54)
-          )
-          (stroke (width 0) (type default))
-          (fill (type none))
-        )
-        (polyline
-          (pts
-            (xy 0 2.54)
-            (xy 0.762 1.27)
-          )
-          (stroke (width 0) (type default))
-          (fill (type none))
-        )
-      )
-      (symbol "VCC_1_1"
-        (pin power_in line (at 0 0 90) (length 0) hide
-          (name "VCC" (effects (font (size 1.27 1.27))))
-          (number "1" (effects (font (size 1.27 1.27))))
-        )
-      )
-    )
   )
 
   (junction (at 100.33 88.9) (diameter 0) (color 0 0 0 0)
@@ -1306,6 +1306,9 @@
   )
   (junction (at 200.66 73.66) (diameter 0) (color 0 0 0 0)
     (uuid 9cd6edaa-7cfb-4b84-bd34-5baad5327b0f)
+  )
+  (junction (at 200.66 66.04) (diameter 0) (color 0 0 0 0)
+    (uuid b26a746a-11ec-43f7-8ada-e6e4721585f9)
   )
   (junction (at 100.33 86.36) (diameter 0) (color 0 0 0 0)
     (uuid b4cdf0ff-86e9-4b1c-bb48-e640a6c9c2fc)
@@ -1919,6 +1922,10 @@
     (stroke (width 0) (type default))
     (uuid 27cdeb56-6468-4be6-84dd-e377ae828479)
   )
+  (wire (pts (xy 198.12 76.2) (xy 208.28 76.2))
+    (stroke (width 0) (type default))
+    (uuid 2826216a-7295-4311-88a1-f987c0cedf5d)
+  )
   (bus (pts (xy 74.93 66.04) (xy 74.93 63.5))
     (stroke (width 0) (type default))
     (uuid 2883ef28-a81f-4cd1-b150-8588fbfcb2a6)
@@ -2053,6 +2060,10 @@
   (wire (pts (xy 200.66 73.66) (xy 219.71 73.66))
     (stroke (width 0) (type default))
     (uuid 453e11c9-8cfe-4eab-bd00-d7f791249785)
+  )
+  (wire (pts (xy 208.28 76.2) (xy 208.28 66.04))
+    (stroke (width 0) (type default))
+    (uuid 456b43c4-f579-4a2c-bb05-204eef638202)
   )
   (wire (pts (xy 68.58 101.6) (xy 80.01 101.6))
     (stroke (width 0) (type default))
@@ -2457,6 +2468,10 @@
     (uuid 8f3ca778-be95-4583-bb45-b87310a6c80d)
   )
 
+  (wire (pts (xy 208.28 66.04) (xy 200.66 66.04))
+    (stroke (width 0) (type default))
+    (uuid 932630e9-6a21-493e-b400-cbeb7b7ba018)
+  )
   (wire (pts (xy 93.98 38.1) (xy 85.09 38.1))
     (stroke (width 0) (type default))
     (uuid 938b8ff9-80a9-4a87-ac3c-d9cb3ca7c213)
@@ -3521,13 +3536,13 @@
     )
   )
 
-  (symbol (lib_id "power:VCC") (at 243.84 26.67 0) (unit 1)
+  (symbol (lib_id "power:+5V") (at 243.84 26.67 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 01db8328-c8bc-45f4-bd21-86848d82a804)
-    (property "Reference" "#PWR06" (at 243.84 30.48 0)
+    (property "Reference" "#PWR?" (at 243.84 30.48 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Value" "VCC" (at 243.84 21.59 0)
+    (property "Value" "+5V" (at 243.84 23.114 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "" (at 243.84 26.67 0)
@@ -3540,7 +3555,7 @@
     (instances
       (project "jml-8-mini"
         (path "/7f93abb4-2372-4a9e-a664-5edb67349db4"
-          (reference "#PWR06") (unit 1)
+          (reference "#PWR?") (unit 1)
         )
       )
     )
@@ -3682,8 +3697,8 @@
     (pin "24" (uuid 524c045a-f82c-44aa-b708-a3c808c8932a))
     (pin "25" (uuid 0105b63c-9ca6-43f0-893f-d2897e4b8247))
     (pin "27" (uuid af164566-cf3c-476a-b480-b5edf01698c2))
-    (pin "28" (uuid 46571ddd-5cfd-478d-b319-5448bbd91780))
-    (pin "28" (uuid 46571ddd-5cfd-478d-b319-5448bbd91780))
+    (pin "28" (uuid 46571ddd-5cfd-478d-b319-5448bbd91784))
+    (pin "28" (uuid 46571ddd-5cfd-478d-b319-5448bbd91784))
     (pin "3" (uuid 9b1f71c0-51bc-4fac-b938-7befa3bc2a57))
     (pin "4" (uuid 7200cae7-1e06-485d-af23-26d5ae6cf556))
     (pin "5" (uuid 72e05ee9-dcf5-4f25-8370-aa4ef20ae0dc))
@@ -3725,13 +3740,13 @@
     )
   )
 
-  (symbol (lib_id "power:VCC") (at 85.09 175.26 0) (unit 1)
+  (symbol (lib_id "power:+5V") (at 85.09 175.26 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 32d8a148-89fa-43c0-9235-eeb5c9bfc0d3)
-    (property "Reference" "#PWR01" (at 85.09 179.07 0)
+    (property "Reference" "#PWR?" (at 85.09 179.07 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Value" "VCC" (at 85.09 170.18 0)
+    (property "Value" "+5V" (at 85.09 171.704 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "" (at 85.09 175.26 0)
@@ -3744,7 +3759,7 @@
     (instances
       (project "jml-8-mini"
         (path "/7f93abb4-2372-4a9e-a664-5edb67349db4"
-          (reference "#PWR01") (unit 1)
+          (reference "#PWR?") (unit 1)
         )
       )
     )
@@ -3864,13 +3879,13 @@
     )
   )
 
-  (symbol (lib_id "power:VCC") (at 200.66 66.04 0) (unit 1)
+  (symbol (lib_id "power:+5V") (at 200.66 66.04 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5df7de69-b2f4-4b4f-85a1-37e0efd29233)
-    (property "Reference" "#PWR017" (at 200.66 69.85 0)
+    (property "Reference" "#PWR?" (at 200.66 69.85 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Value" "VCC" (at 200.66 60.96 0)
+    (property "Value" "+5V" (at 200.66 62.484 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "" (at 200.66 66.04 0)
@@ -3883,7 +3898,7 @@
     (instances
       (project "jml-8-mini"
         (path "/7f93abb4-2372-4a9e-a664-5edb67349db4"
-          (reference "#PWR017") (unit 1)
+          (reference "#PWR?") (unit 1)
         )
       )
     )
@@ -3964,13 +3979,13 @@
     )
   )
 
-  (symbol (lib_id "power:VCC") (at 111.76 77.47 0) (unit 1)
+  (symbol (lib_id "power:+5V") (at 111.76 77.47 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 866bb34e-5704-491e-a2e4-206f4b868989)
-    (property "Reference" "#PWR07" (at 111.76 81.28 0)
+    (property "Reference" "#PWR?" (at 111.76 81.28 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Value" "VCC" (at 111.76 72.39 0)
+    (property "Value" "+5V" (at 111.76 73.914 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "" (at 111.76 77.47 0)
@@ -3983,7 +3998,7 @@
     (instances
       (project "jml-8-mini"
         (path "/7f93abb4-2372-4a9e-a664-5edb67349db4"
-          (reference "#PWR07") (unit 1)
+          (reference "#PWR?") (unit 1)
         )
       )
     )
@@ -4078,13 +4093,13 @@
     )
   )
 
-  (symbol (lib_id "power:VCC") (at 91.44 58.42 0) (unit 1)
+  (symbol (lib_id "power:+5V") (at 91.44 58.42 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 9aac42b5-ddaa-4749-adea-357e21cf1489)
-    (property "Reference" "#PWR013" (at 91.44 62.23 0)
+    (property "Reference" "#PWR?" (at 91.44 62.23 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Value" "VCC" (at 91.44 54.61 0)
+    (property "Value" "+5V" (at 91.44 54.864 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "" (at 91.44 58.42 0)
@@ -4097,7 +4112,7 @@
     (instances
       (project "jml-8-mini"
         (path "/7f93abb4-2372-4a9e-a664-5edb67349db4"
-          (reference "#PWR013") (unit 1)
+          (reference "#PWR?") (unit 1)
         )
       )
     )
@@ -4154,13 +4169,13 @@
     )
   )
 
-  (symbol (lib_id "power:VCC") (at 105.41 26.67 0) (unit 1)
+  (symbol (lib_id "power:+5V") (at 105.41 26.67 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid baec3245-4be8-4500-81a8-5a6d4006d8bf)
-    (property "Reference" "#PWR04" (at 105.41 30.48 0)
+    (property "Reference" "#PWR?" (at 105.41 30.48 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Value" "VCC" (at 105.41 21.59 0)
+    (property "Value" "+5V" (at 105.41 23.114 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "" (at 105.41 26.67 0)
@@ -4173,7 +4188,7 @@
     (instances
       (project "jml-8-mini"
         (path "/7f93abb4-2372-4a9e-a664-5edb67349db4"
-          (reference "#PWR04") (unit 1)
+          (reference "#PWR?") (unit 1)
         )
       )
     )
@@ -4204,13 +4219,13 @@
     )
   )
 
-  (symbol (lib_id "power:VCC") (at 181.61 26.67 0) (unit 1)
+  (symbol (lib_id "power:+5V") (at 181.61 26.67 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid cce8be9e-3fe2-4214-8ecd-edd663e2130d)
-    (property "Reference" "#PWR05" (at 181.61 30.48 0)
+    (property "Reference" "#PWR?" (at 181.61 30.48 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Value" "VCC" (at 181.61 21.59 0)
+    (property "Value" "+5V" (at 181.61 23.114 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "" (at 181.61 26.67 0)
@@ -4223,19 +4238,19 @@
     (instances
       (project "jml-8-mini"
         (path "/7f93abb4-2372-4a9e-a664-5edb67349db4"
-          (reference "#PWR05") (unit 1)
+          (reference "#PWR?") (unit 1)
         )
       )
     )
   )
 
-  (symbol (lib_id "power:VCC") (at 50.8 36.83 0) (unit 1)
+  (symbol (lib_id "power:+5V") (at 50.8 36.83 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e6f53168-53f5-4de6-ae19-eecce723ca84)
-    (property "Reference" "#PWR03" (at 50.8 40.64 0)
+    (property "Reference" "#PWR?" (at 50.8 40.64 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Value" "VCC" (at 50.8 31.75 0)
+    (property "Value" "+5V" (at 50.8 33.274 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "" (at 50.8 36.83 0)
@@ -4248,7 +4263,7 @@
     (instances
       (project "jml-8-mini"
         (path "/7f93abb4-2372-4a9e-a664-5edb67349db4"
-          (reference "#PWR03") (unit 1)
+          (reference "#PWR?") (unit 1)
         )
       )
     )
@@ -4318,13 +4333,13 @@
     )
   )
 
-  (symbol (lib_id "power:VCC") (at 31.75 60.96 0) (unit 1)
+  (symbol (lib_id "power:+5V") (at 31.75 60.96 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid fa04bab5-d336-4422-9943-278cf3542d5b)
-    (property "Reference" "#PWR014" (at 31.75 64.77 0)
+    (property "Reference" "#PWR?" (at 31.75 64.77 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Value" "VCC" (at 31.75 57.15 0)
+    (property "Value" "+5V" (at 31.75 57.404 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "" (at 31.75 60.96 0)
@@ -4337,7 +4352,7 @@
     (instances
       (project "jml-8-mini"
         (path "/7f93abb4-2372-4a9e-a664-5edb67349db4"
-          (reference "#PWR014") (unit 1)
+          (reference "#PWR?") (unit 1)
         )
       )
     )
