@@ -6,3 +6,7 @@ related-projects/AT28C-EEPROM-Programmer-Arduino
 related-projects/AT28C-EEPROM-Programmer-Arduino/**
 docs/datasheet
 docs/datasheet/**
+**/*-backups/
+**/*-backups/**
+**/*-backup/
+**/*-backup/**
