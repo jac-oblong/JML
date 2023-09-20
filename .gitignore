@@ -2,8 +2,11 @@ programs/**
 !programs/README.md
 **/*.out
 **/*.bin
+**/*.lst
 related-projects/AT28C-EEPROM-Programmer-Arduino
 related-projects/AT28C-EEPROM-Programmer-Arduino/**
+related-projects/zasm
+related-projects/zasm/**
 docs/datasheet
 docs/datasheet/**
 **/*-backups/
