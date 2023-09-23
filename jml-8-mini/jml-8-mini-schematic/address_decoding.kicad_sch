@@ -4,6 +4,12 @@
 
   (paper "A4")
 
+  (title_block
+    (date "2023-09-22")
+    (rev "A")
+    (comment 1 "Author: Jacob Long")
+  )
+
   (lib_symbols
     (symbol "74xx:74LS04" (in_bom yes) (on_board yes)
       (property "Reference" "U" (at 0 1.27 0)
@@ -875,7 +881,7 @@
     (stroke (width 0) (type default))
     (uuid 4c6c3cf4-ed33-48a6-b055-0f8083d401db)
   )
-  (bus (pts (xy 24.13 29.21) (xy 53.34 29.21))
+  (bus (pts (xy 27.94 29.21) (xy 53.34 29.21))
     (stroke (width 0) (type default))
     (uuid 53ce3c85-f6d3-4712-906d-38ff8cb77a17)
   )
@@ -971,7 +977,7 @@
     (stroke (width 0) (type default))
     (uuid dd873be8-0d8f-45a9-b239-c1d4efe05a98)
   )
-  (bus (pts (xy 24.13 34.29) (xy 43.18 34.29))
+  (bus (pts (xy 27.94 34.29) (xy 43.18 34.29))
     (stroke (width 0) (type default))
     (uuid ddc0f435-e25a-4130-9284-34c90c73c4b8)
   )
@@ -1040,7 +1046,7 @@
     (effects (font (size 1.27 1.27)) (justify left))
     (uuid 0f38fd1f-4802-4078-a183-e1c271b83b18)
   )
-  (hierarchical_label "Z80 SIG" (shape input) (at 24.13 34.29 180) (fields_autoplaced)
+  (hierarchical_label "Z80 SIG BUS" (shape input) (at 27.94 34.29 180) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify right))
     (uuid 108f5c41-37d7-4e0d-9325-03090595fdb2)
   )
@@ -1048,7 +1054,7 @@
     (effects (font (size 1.27 1.27)) (justify left))
     (uuid 2cb1f917-111c-489e-8614-a62d7736dde0)
   )
-  (hierarchical_label "ADDR" (shape input) (at 24.13 29.21 180) (fields_autoplaced)
+  (hierarchical_label "ADDR BUS" (shape input) (at 27.94 29.21 180) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify right))
     (uuid 469f4a35-285c-4b20-8119-9ebc85f887c1)
   )

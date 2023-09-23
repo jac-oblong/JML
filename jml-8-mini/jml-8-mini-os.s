@@ -12,6 +12,11 @@
 ;;      * labels not designed to be called/jumped to are preceded by '_'
 ;;      * function labels are preceded by 'f_'
 ;;      * general flow control labels are not preceded by anything
+;;
+;; When calling a function, BC and HL are the only set of registers guaranteed
+;; to not be changed, the SP will be edited as described in the functions
+;; documentation, additionally, if reg I changes it will be listed in
+;; documentation along with relevant change
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -114,6 +119,25 @@ _main:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+f_uart_rts_off:
+  ;; turns off the RTS pin going from SIO to other device
+  ld A, 0x05                    ; select WR5
+  out (SIO_A_CONT), A
+  ld A, 0xE8                    ; DTR active, tx 8 bit, tx on, RTS off
+  out (SIO_A_CONT), A
+  ret
+
+f_uart_rts_on:
+  ;; turns on the RTS pin going from SIO to other device
+  ld A, 0x05                    ; select WR5
+  out (SIO_A_CONT), A
+  ld A, 0xEA                    ; DTR active, tx 8 bit, tx on, RTS on
+  out (SIO_A_CONT), A
+  ret
+
+f_uart_send_byte:
+  ;; sends a single byte, the byte is expected to be in reg B when calling the
+  ;; function, this function may 'block' until the tx buffer is empty
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

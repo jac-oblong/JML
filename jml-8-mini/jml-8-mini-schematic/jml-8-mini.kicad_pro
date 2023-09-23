@@ -475,6 +475,18 @@
     [
       "0d9b5471-55ed-4c8b-801f-ea410459ca65",
       "Address Decoding"
+    ],
+    [
+      "024bfdd5-d810-4269-aa23-d376373ff9a1",
+      "Clock and Reset"
+    ],
+    [
+      "efeade64-eca6-4fc4-a8d8-20052102414d",
+      "Memory"
+    ],
+    [
+      "11c4238e-8051-4a00-8608-741a8b831ae1",
+      "Peripherals"
     ]
   ],
   "text_variables": {}

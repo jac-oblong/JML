@@ -1,0 +1,32 @@
+(kicad_sch (version 20230121) (generator eeschema)
+
+  (uuid 45655b50-4b04-4278-9a84-f7ec059cfcdf)
+
+  (paper "A4")
+
+  (lib_symbols
+  )
+
+
+  (text "RESET" (at 59.055 26.035 0)
+    (effects (font (size 3.5 3.5) bold) (justify left bottom))
+    (uuid 819a6662-b2fe-4fe8-9cdb-f1e4e7571649)
+  )
+  (text "CLOCK" (at 212.725 26.035 0)
+    (effects (font (size 3.5 3.5) (thickness 0.7) bold) (justify left bottom))
+    (uuid 833196c3-0166-4839-bbee-8aabf18eb842)
+  )
+
+  (hierarchical_label "UART CLK" (shape input) (at 102.235 102.87 180) (fields_autoplaced)
+    (effects (font (size 1.27 1.27)) (justify right))
+    (uuid 1077858d-a76a-4aac-aefa-f2323e95959b)
+  )
+  (hierarchical_label "CLK" (shape input) (at 100.965 80.645 180) (fields_autoplaced)
+    (effects (font (size 1.27 1.27)) (justify right))
+    (uuid 36617073-1f2d-4cba-ae5f-8800689eac94)
+  )
+  (hierarchical_label "~{RESET}" (shape input) (at 101.6 93.98 180) (fields_autoplaced)
+    (effects (font (size 1.27 1.27)) (justify right))
+    (uuid f00ccc04-056c-4ece-810b-abf912d690e3)
+  )
+)
