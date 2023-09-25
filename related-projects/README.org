@@ -7,22 +7,24 @@ directory.
 
 These projects do not occur in any particular order.
 
-** Arduino Z80 Debugger
-This is a small Arduino-based project designed to capture output signals from 
-a *Z80 CPU*
-
-More details: [[./arduino-debugger][Arduino Z80 Debugger]].
-
-** Arduino RAM Tester
-This is a small Arduino-based project designed to test whether or not a ram IC
-is working. The tests are very basic and not at all comprehensive.
-
-More details: [[./ram-tester][Arduino RAM Tester]].
+** Table of Contents :toc:
+- [[#jml-related-projects][jml Related Projects]]
+  - [[#at28c-eeprom-programmer-for-arduino-mega][AT28C EEPROM Programmer for Arduino Mega]]
+  - [[#zasm][ZASM]]
+  - [[#jml-terminal][jml Terminal]]
 
 ** AT28C EEPROM Programmer for Arduino Mega
 This [[https://github.com/crmaykish/AT28C-EEPROM-Programmer-Arduino.git][project]] was created by *crmaykish* on GitHub. It was very useful for
 programming the EEPROMs used in the *jml* computers.
 
+** ZASM
+This [[https://github.com/Megatokio/zasm][project]] was the main assembler used for the entirety of the *jml*
+project. While another assembler could also be used, the assembler
+directives were taken from *zasm*, so may not work elsewhere.
+
+** jml Terminal
+This [[file:./jml-terminal][project]] provides a terminal that was specifically designed to be
+used with *jml* computers.
 
 # ** Text Editor
 # This is a very simplistic text editor designed to be run on a *jml* computer.
