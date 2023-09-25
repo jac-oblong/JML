@@ -36,6 +36,15 @@ CTC_TIMER1: equ 0x09
 CTC_TIMER2: equ 0x0A
 CTC_TIMER3: equ 0x0B
 
+;; FIFO BUFFER FOR HOLDING INPUT DATA (0x8000-0x80FF) (memory address 0x8100
+;; holds current size of buffer) (this buffer is rolling, so the 'base' may
+;; change while the computer is running)
+RX_DATA_BASE: equ 0x8000
+RX_DATA_CURR: equ 0x8100
+
+;; DEFAULT STARTING LOCATION OF STACK
+STACKSTART: equ 0x0000
+
 
 .org 0x0000
 
@@ -46,12 +55,11 @@ CTC_TIMER3: equ 0x0B
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 _init_ctc:
-  ld A, 0x07                    ; initialize timer 0 of ctc to timer mode,
-  out (CTC_TIMER0), A           ; no interrupt, /16 prescaler,
-                                ; automatic triggering, time constant follows,
-                                ; and reset
+  ld A, 0x47                    ; initialize timer 0 of ctc to counter mode,
+  out (CTC_TIMER0), A           ; no interrupt, time constant follows, reset
 
-  ld A, 26                      ; count for ctc0, should generate ~9.6kHz
+  ld A, 8                       ; count for ctc0, should generate ~150kHz for
+                                ; 9600 baud rate used by SIO channel A
   out (CTC_TIMER0), A
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -68,7 +76,7 @@ _init_sio:
 
   ld A, 0x04                    ; select WR4
   out (SIO_A_CONT), A
-  ld A, 0x05                    ; odd parity, 1 stop bit, 8 data bits, x1 clock
+  ld A, 0x45                    ; odd parity, 1 stop bit, 8 data bits, x1 clock
   out (SIO_A_CONT), A
 
   ld A, 0x05                    ; select WR5
@@ -82,7 +90,7 @@ _init_sio:
                                 ; affects int vec
   out (SIO_B_CONT), A
 
-  ls A, 0x02                    ; select WR2
+  ld A, 0x02                    ; select WR2
   out (SIO_B_CONT), A
   ld A, 0xF0                    ; load interrupt vector (lower 8 bits, lowest 4
                                 ; will be changed to match vector)
@@ -108,10 +116,15 @@ _init_sio:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 _main:
-  ls A, 0x1F
-  ls I, A                       ; load I reg with 0x1F, used for int vectors
+  ld A, 0x1F
+  ld I, A                       ; load I reg with 0x1F, used for int vectors
+  ld SP, STACKSTART             ; load SP with starting value
   im 2                          ; set interrupt mode to 2
   ei                            ; enable interrupts
+
+loop:
+  jp loop
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -135,9 +148,18 @@ f_uart_rts_on:
   out (SIO_A_CONT), A
   ret
 
-f_uart_send_byte:
-  ;; sends a single byte, the byte is expected to be in reg B when calling the
-  ;; function, this function may 'block' until the tx buffer is empty
+f_uart_block_tx_empty:
+  ;; blocks until the tx buffer is empty
+  sub A                         ; clear A
+
+  inc A                         ; select RR1
+  out (SIO_A_CONT), A
+
+  in A, (SIO_A_CONT)            ; read value of RR1
+  bit 0, A                      ; test bit zero of A, will be 0 when empty
+
+  jp Z, f_uart_block_tx_empty
+  ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -145,6 +167,26 @@ f_uart_send_byte:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+__uart_rx_available:
+  ;; retrieves received data from uart and adds to input buffer
+  di                            ; disable interrupts
+  call f_uart_rts_off           ; tell host to not send more data
+
+  ld HL, RX_DATA_BASE           ; set base of input buffer
+  ld A, (RX_DATA_CURR)          ; get current location of input buffer
+  inc A
+  ld (RX_DATA_CURR), A          ; increment top of buffer
+  ld L, A                       ; HL now has location where new byte should go
+
+  in A, (SIO_A_DATA)            ; read rx byte and store in buffer
+  ld (HL), A
+
+  call f_uart_rts_on            ; allow for more data to be sent
+  ei
+  reti
+
+__spec_rx_condition:
+  halt
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
