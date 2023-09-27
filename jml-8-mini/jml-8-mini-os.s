@@ -5,7 +5,7 @@
 ;; Everything is organized under 'headers'
 ;;
 ;; The interrupt table, interrupt definitions and function defintions are at the
-;; end of the file (and end of rom)
+;; end of the file
 ;;
 ;; Labels are formatted in the following ways:
 ;;      * interrupt labels are preceded by '__' (2 underscores)
@@ -13,10 +13,11 @@
 ;;      * function labels are preceded by 'f_'
 ;;      * general flow control labels are not preceded by anything
 ;;
-;; When calling a function, BC and HL are the only set of registers guaranteed
-;; to not be changed, the SP will be edited as described in the functions
-;; documentation, additionally, if reg I changes it will be listed in
-;; documentation along with relevant change
+;; Labels inside of a function should have part of the function name in it in
+;; order to prevent conflicting labels
+;;
+;; When calling a function, no registers should be clobbered (excluding F)
+;; If a register's value is changed, it should be listed in the description
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -113,17 +114,25 @@ continue_sio_init:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 _main:
-  ld A, 0x1F
-  ld I, A                       ; load I reg with 0x1F, used for int vectors
+  ld A, interrupt_vector_table/256
+  ld I, A                       ; load I reg, used for int vectors
   ld SP, STACKSTART             ; load SP with starting value
   im 2                          ; set interrupt mode to 2
   ei                            ; enable interrupts
 
 send_all_chars_loop:
+  ld A, 0x0A                    ; line feed
+  out (SIO_A_DATA), A           ; send to uart
+  call f_uart_block_tx_empty
+  ld A, 0x0D                    ; carriage return
+  out (SIO_A_DATA), A           ; send to uart
+  call f_uart_block_tx_empty
   ld A, 0x20                    ; load A with ascii for ' '
 send_a_char:
   out (SIO_A_DATA), A           ; send to uart
+  ld B, A                       ; save A in B
   call f_uart_block_tx_empty
+  ld A, B                       ; retrieve A from B
   inc A                         ; go to next ascii value
   bit 7, A                      ; check if bit 7 if set in A
   jp z, send_a_char             ; if not overflow, send next char
@@ -135,24 +144,36 @@ send_a_char:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; turns off the RTS pin going from SIO to other device
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 f_uart_rts_off:
-  ;; turns off the RTS pin going from SIO to other device
+  push AF
   ld A, 0x05                    ; select WR5
   out (SIO_A_CONT), A
   ld A, 0xE8                    ; DTR active, tx 8 bit, tx on, RTS off
   out (SIO_A_CONT), A
+  pop AF
   ret
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; turns on the RTS pin going from SIO to other device
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 f_uart_rts_on:
-  ;; turns on the RTS pin going from SIO to other device
+  push AF
   ld A, 0x05                    ; select WR5
   out (SIO_A_CONT), A
   ld A, 0xEA                    ; DTR active, tx 8 bit, tx on, RTS on
   out (SIO_A_CONT), A
+  pop AF
   ret
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; blocks until the tx buffer is empty
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 f_uart_block_tx_empty:
-  ;; blocks until the tx buffer is empty
+  push AF
+uart_block_tx_empty_repeat:
   sub A                         ; clear A
 
   inc A                         ; select RR1
@@ -161,7 +182,8 @@ f_uart_block_tx_empty:
   in A, (SIO_A_CONT)            ; read value of RR1
   bit 0, A                      ; test bit zero of A, will be 0 when empty
 
-  jp z, f_uart_block_tx_empty
+  jp z, uart_block_tx_empty_repeat
+  pop AF
   ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -207,6 +229,9 @@ __spec_rx_condition:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; INTERRUPT TABLE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.org 0x1F00
+interrupt_vector_table:
 
   ;; interrupt vectors for SIO channel B, not used
   ;; .org 0x1FF0
