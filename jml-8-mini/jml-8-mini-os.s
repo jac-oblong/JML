@@ -18,6 +18,9 @@
 ;;
 ;; When calling a function, no registers should be clobbered (excluding F)
 ;; If a register's value is changed, it should be listed in the description
+;;
+;; Interrupts exclusively use the alternate registers of the Z80, so using them
+;; elsewhere is not advised
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
