@@ -211,6 +211,56 @@ uart_block_tx_empty_repeat:
   ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; checks if there is data in the rx buffer
+;; clobbers A: will have value 0 if no data, non-zero if data in buffer
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+f_rx_buf_has_data:
+  push HL
+
+  ld HL, RX_BUF_HEAD
+  ld A, (HL)
+  inc HL                        ; set HL to point at tail
+  sub (HL)                      ; subtract the tail from the head
+
+  pop HL
+  ret
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; retrieves one byte from the rx buffer, if there is any data
+;; clobbers A: will have value 0 (NULL) if no data in the buffer, otherwise
+;; will have the first byte from the buffer
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+f_rx_buf_retrieve_byte:
+  push HL
+  push BC
+
+  call f_rx_buf_has_data        ; check if buffer has data
+  cp 0x00
+  jp z, rx_buf_retr_byte_end    ; quit if no data
+
+  ld HL, RX_BUF_TAIL
+  ld A, (HL)                    ; retrieving the data at the tail, incrementing
+  ld L, A                       ; where tail is pointing (ensuring that there is
+  ld B, (HL)                    ; no overflow), and saving the new value back in
+  inc A                         ; the tail
+  cp RX_BUF_SIZE
+  jp nz, rx_buf_retr_byte_save_tail
+  ld A, 0x00
+rx_buf_retr_byte_save_tail:
+  ld HL, RX_BUF_TAIL
+  ld (HL), A
+  ld A, B                       ; B had the data in the buffer, so moving to A
+
+rx_buf_retr_byte_end:
+  pop BC
+  pop HL
+  ret
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; INTERRUPTS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
