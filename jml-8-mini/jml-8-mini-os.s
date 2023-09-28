@@ -120,6 +120,10 @@ _main:
   ld A, interrupt_vector_table/256
   ld I, A                       ; load I reg, used for int vectors
   ld SP, STACKSTART             ; load SP with starting value
+  ld HL, RX_DATA_HEAD           ; zero out input buffer head and tail pointers
+  ld (HL), 0x00
+  inc HL
+  ld (HL), 0x00
   im 2                          ; set interrupt mode to 2
   ei                            ; enable interrupts
 
