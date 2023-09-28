@@ -42,17 +42,24 @@ CTC_TIMER3: equ 0x0B
 
 ;; FIFO BUFFER FOR HOLDING INPUT DATA (0x8000-0x80FD) (memory address 0x80FF
 ;; holds where the tail of the buffer is and where data should be read from,
-;; 0x80FE holds where the head of the buffer is and where new data should be
-;; put) (this buffer is rolling)
-RX_DATA_BASE: equ 0x8000
-RX_DATA_HEAD: equ 0x80FE    ; only to be written to by an interrupt
-RX_DATA_TAIL: equ 0x80FF    ; only to be written to by _main
+;; 0x80FE holds where the head of the buffer is and where the newest byte of
+;; data is) (this buffer is rolling)
+RX_BUF_BASE: equ 0x8000
+RX_BUF_SIZE: equ 0xFE           ; total size of buffer in bytes
+RX_BUF_HEAD: equ 0x80FE         ; only to be written to by an interrupt
+RX_BUF_TAIL: equ 0x80FF         ; only to be written to by _main
+RX_BUF_HEAD_VAL: equ 0xFF       ; initial value for head
+RX_BUF_TAIL_VAL: equ 0x00       ; initial value for tail
 
 ;; DEFAULT STARTING LOCATION OF STACK
 STACKSTART: equ 0x0000
 
 
 .org 0x0000
+
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -68,6 +75,10 @@ _init_ctc:
                                 ; 9600 baud rate used by SIO channel A
   out (CTC_TIMER0), A
 
+
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; INITIALIZE SIO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -76,6 +87,8 @@ _init_ctc:
 
 _init_sio:
   jp continue_sio_init          ; jump over this section of data
+
+  ;; data block used to initialize SIO
 SIO_A_INIT_DATA_BEGIN:
   db 0x30                       ; reset any errors, select WR0
   db 0x18                       ; reset channel A
@@ -109,6 +122,10 @@ continue_sio_init:
   otir
 
   ;; SIO channel A is now active, ready for use with UART
+
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -207,19 +224,19 @@ __uart_rx_available:
 
   call f_uart_rts_off           ; tell host to not send more data
 
-  ld HL, RX_DATA_TAIL           ; set base of input buffer (lower 8 bits will be
+  ld HL, RX_BUF_TAIL            ; set base of input buffer (lower 8 bits will be
                                 ; changed, so loading TAIL to be used later)
-  ld A, (RX_DATA_HEAD)          ; get current location of input buffer
+  ld A, (RX_BUF_HEAD)           ; get current location of input buffer
   inc A
-  cp 0xFE                       ; upper limit of input buffer
+  cp RX_BUF_SIZE                ; upper limit of input buffer
   jp NZ, uart_rx_avail_store_byte
   ld A, 0x00
 
 uart_rx_avail_store_byte:
   cp (HL)                       ; do head and tail match, if so, means we looped
                                 ; around, will ignore new data
-  jp z, uart_rx_avail_clean_up
-  ld (RX_DATA_HEAD), A          ; store new location of HEAD
+  jp z, uart_rx_avail_clean_up  ; TODO: should set some sort of global flag for this
+  ld (RX_BUF_HEAD), A           ; store new location of HEAD
   ld L, A                       ; HL now has location where new byte should go
 
   in A, (SIO_A_DATA)            ; read rx byte and store in buffer
@@ -235,6 +252,10 @@ uart_rx_avail_clean_up:
 
 __spec_rx_condition:
   halt
+
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
