@@ -207,20 +207,25 @@ __uart_rx_available:
 
   call f_uart_rts_off           ; tell host to not send more data
 
-  ld HL, RX_DATA_BASE           ; set base of input buffer
+  ld HL, RX_DATA_TAIL           ; set base of input buffer (lower 8 bits will be
+                                ; changed, so loading TAIL to be used later)
   ld A, (RX_DATA_HEAD)          ; get current location of input buffer
   inc A
   cp 0xFE                       ; upper limit of input buffer
-  jp NZ, store_byte
+  jp NZ, uart_rx_avail_store_byte
   ld A, 0x00
 
-store_byte:
+uart_rx_avail_store_byte:
+  cp (HL)                       ; do head and tail match, if so, means we looped
+                                ; around, will ignore new data
+  jp z, uart_rx_avail_clean_up
   ld (RX_DATA_HEAD), A          ; store new location of HEAD
   ld L, A                       ; HL now has location where new byte should go
 
   in A, (SIO_A_DATA)            ; read rx byte and store in buffer
   ld (HL), A
 
+uart_rx_avail_clean_up:
   call f_uart_rts_on            ; allow for more data to be sent
 
   ex AF, AF'                    ; exchange registers again
