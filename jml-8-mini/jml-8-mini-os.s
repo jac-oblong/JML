@@ -137,30 +137,29 @@ _main:
   ld A, interrupt_vector_table/256
   ld I, A                       ; load I reg, used for int vectors
   ld SP, STACKSTART             ; load SP with starting value
-  ld HL, RX_DATA_HEAD           ; zero out input buffer head and tail pointers
-  ld (HL), 0x00
+  ld HL, RX_BUF_HEAD            ; reset rx buffer pointers
+  ld (HL), RX_BUF_HEAD_VAL
   inc HL
-  ld (HL), 0x00
+  ld (HL), RX_BUF_TAIL_VAL
   im 2                          ; set interrupt mode to 2
   ei                            ; enable interrupts
 
-send_all_chars_loop:
-  ld A, 0x0A                    ; line feed
-  out (SIO_A_DATA), A           ; send to uart
-  call f_uart_block_tx_empty
-  ld A, 0x0D                    ; carriage return
-  out (SIO_A_DATA), A           ; send to uart
-  call f_uart_block_tx_empty
-  ld A, 0x20                    ; load A with ascii for ' '
-send_a_char:
-  out (SIO_A_DATA), A           ; send to uart
-  ld B, A                       ; save A in B
-  call f_uart_block_tx_empty
-  ld A, B                       ; retrieve A from B
-  inc A                         ; go to next ascii value
-  bit 7, A                      ; check if bit 7 if set in A
-  jp z, send_a_char             ; if not overflow, send next char
-  jp send_all_chars_loop
+  ;; this code will wait for a character from uart, increment the value of that
+  ;; character, and then send the new value back
+wait_for_next_byte:
+  halt                          ; wait for interrupt (character received)
+
+fetch_byte_and_send:
+  call f_rx_buf_retrieve_byte
+  inc A
+  out (SIO_A_DATA), A
+  call f_rx_buf_has_data
+  jp z, wait_for_next_byte
+  jp fetch_byte_and_send
+
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
