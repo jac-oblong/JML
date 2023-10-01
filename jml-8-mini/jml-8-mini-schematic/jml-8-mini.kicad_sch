@@ -808,6 +808,10 @@
     (uuid cbbc2587-e6cf-4932-bbcd-254537774aa7)
   )
 
+  (no_connect (at 132.08 84.455) (uuid 2c59047c-9f00-4a86-b582-caa2fdab748d))
+  (no_connect (at 132.08 79.375) (uuid 4d6991b3-736f-4acf-9b1b-e8df3a19e346))
+  (no_connect (at 132.08 112.395) (uuid c5a1ba1c-1cef-45ba-8068-34f300f0e60c))
+
   (bus_entry (at 118.745 97.155) (size 2.54 2.54)
     (stroke (width 0) (type default))
     (uuid 050d1e2b-09f4-4550-aaf2-5499b82a1982)
