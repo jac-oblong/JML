@@ -12,7 +12,7 @@ clean:
 	rm -f *.bin
 	rm -f *.lst
 
-jml-8-mini-os.bin: jml-8-mini-os.s
+jml-8-mini-os.bin: jml-8-mini-os.s clean
 	zasm ${ZASM_ARGS} jml-8-mini-os.s
 
 # end
