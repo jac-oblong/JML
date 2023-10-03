@@ -13,3 +13,5 @@ docs/datasheet/**
 **/*-backups/**
 **/*-backup/
 **/*-backup/**
+**/fp-info-cache
+**/*.bak
