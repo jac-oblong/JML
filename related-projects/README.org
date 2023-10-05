@@ -1,34 +1,27 @@
-* jml Related Projects
-This directory contains projects that were helpful in developing the *jml*
+* JML Related Projects
+This directory contains projects that were helpful in developing the *JML*
 line of computers as well as "add-on" projects specifically designed for
-the *jml* computers. Not all projects were done by me; those projects will
+the *JML* computers. Not all projects were done by me; those projects will
 be linked. If they were developed by me, all code, etc. will be in this
 directory.
 
 These projects do not occur in any particular order.
 
 ** Table of Contents :toc:
-- [[#jml-related-projects][jml Related Projects]]
+- [[#jml-related-projects][JML Related Projects]]
   - [[#at28c-eeprom-programmer-for-arduino-mega][AT28C EEPROM Programmer for Arduino Mega]]
   - [[#zasm][ZASM]]
-  - [[#jml-terminal][jml Terminal]]
+  - [[#jml-terminal][JML Terminal]]
 
 ** AT28C EEPROM Programmer for Arduino Mega
 This [[https://github.com/crmaykish/AT28C-EEPROM-Programmer-Arduino.git][project]] was created by *crmaykish* on GitHub. It was very useful for
-programming the EEPROMs used in the *jml* computers.
+programming the EEPROMs used in the *JML* computers.
 
 ** ZASM
-This [[https://github.com/Megatokio/zasm][project]] was the main assembler used for the entirety of the *jml*
+This [[https://github.com/Megatokio/zasm][project]] was the main assembler used for the entirety of the *JML*
 project. While another assembler could also be used, the assembler
 directives were taken from *zasm*, so may not work elsewhere.
 
-** jml Terminal
+** JML Terminal
 This [[file:./jml-terminal][project]] provides a terminal that was specifically designed to be
-used with *jml* computers.
-
-# ** Text Editor
-# This is a very simplistic text editor designed to be run on a *jml* computer.
-# While it can, in theory, be run on a *jml-8*, it would not be useful, as there
-# is no memory. As such, it is really meant for the *jml-8+* computer.
-
-# More details: [[https://github.com/jac-oblong/text-editor][Text Editor]]
+used with *JML* computers.
