@@ -2577,7 +2577,7 @@
     (property "Value" "Z80CPU" (at 152.0541 45.085 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "Package_DIP:DIP-40_W15.24mm_LongPads" (at 149.86 71.755 0)
+    (property "Footprint" "Package_DIP:DIP-40_W15.24mm_Socket_LongPads" (at 149.86 71.755 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "www.zilog.com/manage_directlink.php?filepath=docs/z80/um0080" (at 149.86 71.755 0)
