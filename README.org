@@ -40,9 +40,9 @@ This is a family of 8-bit microcomputers designed around the Z80
 microprocessor.
 
 **** JML-8-Mini
-⚠ This model is still under development.
+⚠ THIS MODEL IS STILL UNDER DEVELOPMENT.
 
-[[file:jml-8-mini][This]] model uses a UART serial port to communicate with a terminal.
+[[File:jml-8-mini][This]] model uses a UART serial port to communicate with a terminal.
 An FTDI chip can be used to send data from your computer to the
 Z80. A [[file:related-projects/jml-terminal][specific terminal]] was created for use with this computer,
 but other terminals will work just as well.
