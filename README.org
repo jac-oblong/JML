@@ -35,13 +35,13 @@ information can be found in the directory linked.
 ** Families
 Below is a list of all families with a brief description of each family.
 
-- [[JML-8]]
+- [[#JML-8][JML-8]]
 
 *** JML-8
 This is a family of 8-bit microcomputers designed around the Z80
 microprocessor.
 
-- [[JML-8-Mini]]
+- [[#JML-8-Mini][JML-8-Mini]]
 
 **** JML-8-Mini
 ⚠ THIS MODEL IS STILL UNDER DEVELOPMENT.
