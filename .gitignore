@@ -16,3 +16,4 @@ docs/datasheet/**
 **/fp-info-cache
 **/*.bak
 **/.hide_*
+**/*.step
