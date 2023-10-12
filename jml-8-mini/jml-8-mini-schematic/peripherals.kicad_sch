@@ -1733,7 +1733,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid b9d453e1-f063-4d44-b1c1-a976ff793211)
   )
-  (label "CTC_IEO" (at 194.31 84.455 0) (fields_autoplaced)
+  (label "SIO_IEO" (at 194.31 84.455 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid ba53defc-53e6-4184-b821-1ad7d4bc04cf)
   )
