@@ -5,7 +5,7 @@
   (paper "A4")
 
   (title_block
-    (title "JML-8 Mini Schematic")
+    (title "JML-8-Mini Schematic")
     (date "2023-10-02")
     (rev "A")
     (company "https://github.com/jac-oblong/JML")
