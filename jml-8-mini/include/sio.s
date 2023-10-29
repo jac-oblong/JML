@@ -124,6 +124,13 @@ uart_block_tx_empty_repeat:
   in A, (SIO_A_CONT)            ; read value of RR1
   bit 0, A                      ; test bit zero of A, will be 0 when empty
 
-  jp z, uart_block_tx_empty_repeat
+  jr z, uart_block_tx_empty_repeat
   pop AF
+  ret
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; sends one byte of data in A to UART port
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+f_uart_send_byte:
+  out (SIO_A_DATA), A
   ret

@@ -2,7 +2,7 @@
 # JML-8 Mini
 ##
 
-ZASM_ARGS="-I ../include -o jml-8-mini-os.bin -b"
+ZASM_ARGS=-o jml-8-mini-firmware.bin -b
 
 all: jml-8-mini-firmware.bin
 
@@ -15,6 +15,6 @@ clean:
 	rm -f ../include/*.lst
 
 jml-8-mini-firmware.bin: jml-8-mini-firmware.s clean
-	zasm ${ZASM_ARGS} jml-8-mini-os.s
+	zasm ${ZASM_ARGS} jml-8-mini-firmware.s
 
 # end

@@ -30,13 +30,15 @@
 
 ;; FIFO BUFFER FOR HOLDING INPUT DATA (0x8000-0x80FD) (memory address 0x80FF
 ;; holds where the tail of the buffer is and where data should be read from,
-;; 0x80FE holds where the head of the buffer is and where the newest byte of
-;; data is) (this buffer is rolling)
+;; 0x80FE holds where the head of the buffer is and where the new data should be
+;; written to) (this buffer is circular) (When more data is added than can be
+;; stored, the newest data is ignored) (When data is read, it is overwritten
+;; with 0x00 to signal that it can be written to)
 RX_BUF_BASE: equ 0x8000
 RX_BUF_SIZE: equ 0xFE           ; total size of buffer in bytes
 RX_BUF_HEAD: equ 0x80FE         ; only to be written to by an interrupt
 RX_BUF_TAIL: equ 0x80FF         ; only to be written to by _main
-RX_BUF_HEAD_VAL: equ 0xFF       ; initial value for head
+RX_BUF_HEAD_VAL: equ 0x00       ; initial value for head
 RX_BUF_TAIL_VAL: equ 0x00       ; initial value for tail
 
 ;; DEFAULT STARTING LOCATION OF STACK
@@ -51,21 +53,37 @@ STACKSTART: equ 0x0000
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-_main:
+_init:
+  ;; stackpointer and interrupt stuff
   ld A, 0x1F
   ld I, A                       ; load I reg, used for int vectors
   ld SP, STACKSTART             ; load SP with starting value
+
+  ;; rx buffer
   ld HL, RX_BUF_HEAD            ; reset rx buffer pointers
   ld (HL), RX_BUF_HEAD_VAL
-  inc HL
+  ld HL, RX_BUF_TAIL
   ld (HL), RX_BUF_TAIL_VAL
+  ld L, RX_BUF_TAIL_VAL         ; set beginning of rx buffer to value 0x00 to
+  ld (HL), 0x00                 ; show that it is empty
+
+  ;; interrupt mode and initializing other hardware
   im 2                          ; set interrupt mode to 2
-  call f_ctc_init
-  call f_sio_init
+  call f_init_ctc
+  call f_init_sio
   ei                            ; enable interrupts
 
-loop:
-  jp loop
+main_loop:
+  halt
+
+  call f_rx_buf_retrieve_byte
+  cp 0x00                       ; if no byte present send 'A' (just a test for
+                                ; now) and return to start of loop
+  jr z, main_loop
+
+  call f_uart_send_byte
+
+  jr main_loop
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -75,16 +93,19 @@ loop:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; checks if there is data in the rx buffer
+;; checks if there is data in the rx buffer (purely by the nature of how the
+;; function works, A will have the new data when returning, but using this
+;; function to fetch data will break the entire input buffer system)
 ;; clobbers A: will have value 0 if no data, non-zero if data in buffer
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 f_rx_buf_has_data:
   push HL
 
-  ld HL, RX_BUF_HEAD
-  ld A, (HL)
-  inc HL                        ; set HL to point at tail
-  sub (HL)                      ; subtract the tail from the head
+  ld HL, RX_BUF_TAIL
+  ld A, (HL)                    ; load A with read section of buffer
+  ld L, A                       ; point HL to where to read from
+  ld A, (HL)                    ; read "new" byte into A
+                                ; if A == 0x00, then no data has been written
 
   pop HL
   ret
@@ -100,18 +121,16 @@ f_rx_buf_retrieve_byte:
 
   call f_rx_buf_has_data        ; check if buffer has data
   cp 0x00
-  jp z, rx_buf_retr_byte_end    ; quit if no data
+  jr z, rx_buf_retr_byte_end    ; quit if no data
 
+  ld B, A                       ; temporarily store data in B
   ld HL, RX_BUF_TAIL
-  ld A, (HL)                    ; retrieving the data at the tail, incrementing
-  ld L, A                       ; where tail is pointing (ensuring that there is
-  ld B, (HL)                    ; no overflow), and saving the new value back in
-  inc A                         ; the tail
-  cp RX_BUF_SIZE
-  jp nz, rx_buf_retr_byte_save_tail
-  ld A, 0x00
+  ld A, (HL)                    ; retrieving where the tail is pointing,
+  inc A                         ; incrementing it, and storing it back if it
+  cp RX_BUF_SIZE                ; does not cause overflow
+  jr nz, rx_buf_retr_byte_save_tail
+  ld A, 0x00                    ; tail overflowed bounds, so setting back to 0
 rx_buf_retr_byte_save_tail:
-  ld HL, RX_BUF_TAIL
   ld (HL), A
   ld A, B                       ; B had the data in the buffer, so moving to A
 
@@ -126,8 +145,8 @@ rx_buf_retr_byte_end:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; INCLUDES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-#include "sio.s"
-#include "ctc.s"
+#include "../include/sio.s"
+#include "../include/ctc.s"
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -137,15 +156,34 @@ rx_buf_retr_byte_end:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 __uart_rx_available:
-  push AF
+  ex AF, AF'
+  exx
 
-  in A, (SIO_A_DATA)
-  call f_uart_block_tx_empty
-  inc A
-  out (SIO_A_DATA), A
-  call f_uart_block_tx_empty
+  in A, (SIO_A_DATA)            ; retrieve the new byte
+  ld B, A                       ; store new byte in B
 
-  pop AF
+  ld HL, RX_BUF_HEAD
+  ld DE, HL                     ; make a copy in DE, will be useful later
+  ld A, (HL)
+  ld L, A                       ; point HL to where in buffer to write new data
+
+  ld A, (HL)                    ; make sure there is room for new data
+  cp 0x00
+  jr nz, uart_rx_avail_end
+
+  ld (HL), B                    ; store the new data into the buffer and
+  inc HL                        ; increment where head is pointing
+  ld A, L
+  cp RX_BUF_SIZE                ; make sure new position is not overflowing buf
+  jr nz, uart_rx_avail_store_new_head
+  ld A, 0x00
+uart_rx_avail_store_new_head:
+  ld HL, DE                     ; retrive location of head from DE
+  ld (HL), A                    ; store new value of head
+
+uart_rx_avail_end:
+  exx
+  ex AF, AF'
   ei
   reti
 
