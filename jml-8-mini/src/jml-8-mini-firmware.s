@@ -59,7 +59,16 @@ _init:
   ld I, A                       ; load I reg, used for int vectors
   ld SP, STACKSTART             ; load SP with starting value
 
-  ;; rx buffer
+  ;; zero out the entirety of the rx buffer
+  ld HL, RX_BUF_BASE
+  ld A, 0x00
+  ld B, RX_BUF_SIZE
+init_zero_out_rx_buf:
+  ld (HL), A
+  inc HL
+  dec B
+  jr nz, init_zero_out_rx_buf
+  ;; set up rx buffer values
   ld HL, RX_BUF_HEAD            ; reset rx buffer pointers
   ld (HL), RX_BUF_HEAD_VAL
   ld HL, RX_BUF_TAIL
@@ -72,6 +81,7 @@ _init:
   call f_init_ctc
   call f_init_sio
   ei                            ; enable interrupts
+  call f_uart_rx_on
 
 main_loop:
   halt
@@ -79,8 +89,9 @@ main_loop:
   call f_rx_buf_retrieve_byte
   cp 0x00                       ; if no byte present send 'A' (just a test for
                                 ; now) and return to start of loop
-  jr z, main_loop
-
+  jr nz, send_byte
+  ld A, 0x41
+send_byte:
   call f_uart_send_byte
 
   jr main_loop
@@ -125,12 +136,15 @@ f_rx_buf_retrieve_byte:
 
   ld B, A                       ; temporarily store data in B
   ld HL, RX_BUF_TAIL
-  ld A, (HL)                    ; retrieving where the tail is pointing,
-  inc A                         ; incrementing it, and storing it back if it
-  cp RX_BUF_SIZE                ; does not cause overflow
+  ld A, (HL)                    ; retrieving where the tail is pointing
+  ld L, A
+  ld (HL), 0x00                 ; zero out memory to show good for new data
+  inc A                         ; increment where tail is pointing
+  cp RX_BUF_SIZE                ; reset it if causes overflow
   jr nz, rx_buf_retr_byte_save_tail
   ld A, 0x00                    ; tail overflowed bounds, so setting back to 0
 rx_buf_retr_byte_save_tail:
+  ld HL, RX_BUF_TAIL
   ld (HL), A
   ld A, B                       ; B had the data in the buffer, so moving to A
 
@@ -158,12 +172,12 @@ rx_buf_retr_byte_end:
 __uart_rx_available:
   ex AF, AF'
   exx
+  call f_uart_rx_off
 
   in A, (SIO_A_DATA)            ; retrieve the new byte
   ld B, A                       ; store new byte in B
 
   ld HL, RX_BUF_HEAD
-  ld DE, HL                     ; make a copy in DE, will be useful later
   ld A, (HL)
   ld L, A                       ; point HL to where in buffer to write new data
 
@@ -178,10 +192,11 @@ __uart_rx_available:
   jr nz, uart_rx_avail_store_new_head
   ld A, 0x00
 uart_rx_avail_store_new_head:
-  ld HL, DE                     ; retrive location of head from DE
+  ld HL, RX_BUF_HEAD
   ld (HL), A                    ; store new value of head
 
 uart_rx_avail_end:
+  call f_uart_rx_on
   exx
   ex AF, AF'
   ei

@@ -132,5 +132,6 @@ uart_block_tx_empty_repeat:
 ;; sends one byte of data in A to UART port
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 f_uart_send_byte:
+  call f_uart_block_tx_empty
   out (SIO_A_DATA), A
   ret
