@@ -46,12 +46,12 @@ microprocessor.
 **** JML-8-Mini
 ⚠ THIS MODEL IS STILL UNDER DEVELOPMENT.
 
-[[File:jml-8-mini][This]] model uses a UART serial port to communicate with a terminal.
+[[file:jml-8-mini][This model]] uses a UART serial port to communicate with a terminal.
 An FTDI chip can be used to send data from a computer to the
-Z80. A [[file:related-projects/jml-terminal][specific terminal]] was created for use with this computer,
-but other terminals will work just as well.
+Z80.
 
 The "operating system" this model runs only allows for very simple
 commands. These commands allow the user to read the values at
 memory locations, write values to memory locations and transfer
-program control to a specific memory location.
+program control to a specific memory location. Additionally, there is a built
+in BASIC interpreter.
