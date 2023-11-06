@@ -11,7 +11,6 @@ These projects do not occur in any particular order.
 - [[#jml-related-projects][JML Related Projects]]
   - [[#at28c-eeprom-programmer-for-arduino-mega][AT28C EEPROM Programmer for Arduino Mega]]
   - [[#zasm][ZASM]]
-  - [[#jml-terminal][JML Terminal]]
 
 ** AT28C EEPROM Programmer for Arduino Mega
 This [[https://github.com/crmaykish/AT28C-EEPROM-Programmer-Arduino.git][project]] was created by *crmaykish* on GitHub. It was very useful for
@@ -21,7 +20,3 @@ programming the EEPROMs used in the *JML* computers.
 This [[https://github.com/Megatokio/zasm][project]] was the main assembler used for the entirety of the *JML-8*
 family of computers. While another assembler could also be used, the
 assembler directives were taken from *zasm*, so may not work elsewhere.
-
-** JML Terminal
-This [[file:./jml-terminal][project]] provides a terminal that was specifically designed to be
-used with *JML-8* family computers.
