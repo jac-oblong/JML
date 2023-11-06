@@ -1766,7 +1766,7 @@
     (property "Reference" "R4" (at 250.19 34.925 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "10K" (at 250.19 37.465 0)
+    (property "Value" "100K" (at 250.19 37.465 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (at 248.285 36.195 0)
