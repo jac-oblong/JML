@@ -38,17 +38,12 @@ SIO_B_CONT: equ 0x07
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Initializes the SIO to work with UART at 9600 baud
+;; Initializes the SIO to work with UART at 9600 baud, 8-N-1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 f_init_sio:
   ld C, SIO_A_CONT              ; load C with location of sio cha control
   ld B, SIO_A_INIT_DATA_SIZE    ; load B with number of bytes to load
   ld HL, SIO_A_INIT_DATA_BEGIN  ; load HL with beginning of data
-  otir
-
-  ld C, SIO_B_CONT              ; repeat for chb
-  ld B, SIO_B_INIT_DATA_SIZE
-  ld HL, SIO_B_INIT_DATA_BEGIN
   otir
 
   ;; SIO channel A is now active, ready for use with UART
@@ -67,14 +62,7 @@ SIO_A_INIT_DATA_BEGIN:
   db 0x03                       ; select WR3
   db 0xC1                       ; enable rx, 8 bits per character
 SIO_A_INIT_DATA_SIZE: equ $-SIO_A_INIT_DATA_BEGIN
-SIO_B_INIT_DATA_BEGIN:
-  db 0x01                       ; select WR1
-  db 0x04                       ; no interrupt in chb, spec rx condition affects
-                                ; interrupt vector
-  db 0x02                       ; select WR2
-  db 0xF0                       ; load interrupt vector with lower 8 bits
-                                ; (lowest 4 will be changed depending on vector)
-SIO_B_INIT_DATA_SIZE: equ $-SIO_B_INIT_DATA_BEGIN
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -111,27 +99,33 @@ f_uart_rx_on:
   ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; blocks until the tx buffer is empty
+;; sends one byte of data in A to UART port
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-f_uart_block_tx_empty:
+f_uart_put_byte:
   push AF
-uart_block_tx_empty_repeat:
-  sub A                         ; clear A
-
-  inc A                         ; select RR1
-  out (SIO_A_CONT), A
-
-  in A, (SIO_A_CONT)            ; read value of RR1
-  bit 0, A                      ; test bit zero of A, will be 0 when empty
-
-  jr z, uart_block_tx_empty_repeat
+block_tx_empty:
+  in A, (SIO_A_CONT)            ; read control register 0 of SIO
+  and 0x04                      ; check if tx buffer is empty
+  jr z, block_tx_empty          ; wait till it is
   pop AF
+  out (SIO_A_DATA), A           ; send data in A over uart
   ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; sends one byte of data in A to UART port
+;; gets one byte of data from UART port and stores in A
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-f_uart_send_byte:
-  call f_uart_block_tx_empty
-  out (SIO_A_DATA), A
+f_uart_get_byte:
+block_byte_avail:
+  in A, (SIO_A_CONT)            ; read control register 0 of SIO
+  and 0x01                      ; check if rx character is available
+  jr z, block_byte_avail        ; wait till it is
+  in A, (SIO_A_DATA)            ; store incoming byte in A
+  ret
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; checks whether or not there is new data, reg A will be 0 if no data
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+f_uart_check_input:
+  in A, (SIO_A_CONT)            ; read control register 0 of SIO
+  and 0x01                      ; mask all bits but rx available bit
   ret
