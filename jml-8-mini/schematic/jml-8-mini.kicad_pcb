@@ -8,7 +8,7 @@
   (title_block
     (title "JML-8-Mini PCB")
     (date "2023-10-20")
-    (rev "B")
+    (rev "C")
   )
 
   (layers
@@ -6136,7 +6136,7 @@
   (gr_text "15" (at 176.662 41.94 90) (layer "B.SilkS") (tstamp f52d4850-30d8-4b30-ae2a-d88ad1497871)
     (effects (font (size 1.016 1.016) (thickness 0.1524)) (justify left bottom mirror))
   )
-  (gr_text "Rev B" (at 194.183 59.69 90) (layer "F.SilkS") (tstamp 142f95e7-d73f-4cb9-9be0-79456a6889ec)
+  (gr_text "Rev C" (at 194.183 59.69 90) (layer "F.SilkS") (tstamp 142f95e7-d73f-4cb9-9be0-79456a6889ec)
     (effects (font (size 1.778 1.778) (thickness 0.22225)) (justify left bottom))
   )
   (gr_text "SIO CHB" (at 166.878 137.287) (layer "F.SilkS") (tstamp 145d1a57-9446-4ca0-8bda-96e3c2d470cd)
