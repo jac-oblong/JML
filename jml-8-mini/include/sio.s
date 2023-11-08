@@ -7,8 +7,9 @@
 ;; Labels are formatted in the following ways:
 ;;      * interrupt labels are preceded by '__' (2 underscores)
 ;;      * labels not designed to be called/jumped to are preceded by '_'
-;;      * function labels are preceded by 'f_'
+;;      * function labels are preceded by 'f_' (meant to be called)
 ;;      * general flow control labels are not preceded by anything
+;;      * labels in all caps are used to access data
 ;;
 ;; Labels inside of a function should have part of the function name in it in
 ;; order to prevent conflicting labels
@@ -109,6 +110,24 @@ block_tx_empty:
   jr z, block_tx_empty          ; wait till it is
   pop AF
   out (SIO_A_DATA), A           ; send data in A over uart
+  ret
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; prints a string of bytes to UART, start of string should be in HL reg and
+;; string should be null terminated
+;; NOTE: HL will be changed to point at end of string (at null byte)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+f_uart_put_string:
+  push AF
+get_next_byte:
+  ld A, (HL)                    ; put next byte in A reg
+  cp 0x00                       ; check if end of string
+  jr z, put_string_end
+  call f_uart_put_byte          ; print A reg
+  inc HL                        ; increment string pointer (HL)
+  jr get_next_byte              ; repeat for next byte
+put_string_end:
+  pop AF
   ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

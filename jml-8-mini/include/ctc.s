@@ -7,8 +7,9 @@
 ;; Labels are formatted in the following ways:
 ;;      * interrupt labels are preceded by '__' (2 underscores)
 ;;      * labels not designed to be called/jumped to are preceded by '_'
-;;      * function labels are preceded by 'f_'
+;;      * function labels are preceded by 'f_' (meant to be called)
 ;;      * general flow control labels are not preceded by anything
+;;      * labels in all caps are used to access data
 ;;
 ;; Labels inside of a function should have part of the function name in it in
 ;; order to prevent conflicting labels
