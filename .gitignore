@@ -16,5 +16,6 @@ docs/datasheet/**
 **/fp-info-cache
 **/*.bak
 **/.hide_*
-**/*.step
+lib/kicad/*.step
+jml-8-mini/schematic/*.step
 **/basic.s
