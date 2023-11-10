@@ -2591,11 +2591,6 @@
       (net 4 "/Power, Clock and Reset/555Trigger") (pinfunction "2") (pintype "passive") (tstamp dedd69eb-ce59-4299-9ded-92cb458527d9))
     (pad "2" thru_hole circle (at 7.62 5.08 180) (size 1.397 1.397) (drill 0.8128) (layers "*.Cu" "*.Mask")
       (net 4 "/Power, Clock and Reset/555Trigger") (pinfunction "2") (pintype "passive") (tstamp ba7662be-fd79-44a9-8401-e981b1044e1f))
-    (model "${KICAD6_3DMODEL_DIR}/Button_Switch_THT.3dshapes/SW_Tactile_Straight_KSA0Axx1LFTR.wrl"
-      (offset (xyz 0 0 0))
-      (scale (xyz 1 1 1))
-      (rotate (xyz 0 0 0))
-    )
     (model "${KIPRJMOD}/Button_red.step"
       (offset (xyz 3.81 -2.54 0))
       (scale (xyz 1.05 1 1))
@@ -3200,14 +3195,9 @@
       (net 91 "unconnected-(SW2-B-Pad5)") (pinfunction "B") (pintype "passive+no_connect") (tstamp 8eae3013-ebff-4302-a2c3-453a751209cc))
     (pad "6" thru_hole circle (at 5 6 180) (size 1.8 1.8) (drill 0.9) (layers "*.Cu" "*.Mask")
       (net 92 "unconnected-(SW2-C-Pad6)") (pinfunction "C") (pintype "passive+no_connect") (tstamp 2e0be150-fd6c-4d6d-b261-7c55ef4ddcdb))
-    (model "${KICAD6_3DMODEL_DIR}/Button_Switch_THT.3dshapes/SW_Push_2P2T_Toggle_CK_PVA2xxH1xxxxxxV2.wrl" hide
-      (offset (xyz 0 0 0))
-      (scale (xyz 1 1 1))
-      (rotate (xyz 0 0 0))
-    )
-    (model "${KIPRJMOD}/ON_ON_7x7mm_6pin.step"
+    (model "${JML_KICAD_LIB}/VerticalPushToggle2P2T.step"
       (offset (xyz 0 -5.969 0))
-      (scale (xyz 1.2 1.225 1))
+      (scale (xyz 1 1 1))
       (rotate (xyz 0 0 90))
     )
   )
