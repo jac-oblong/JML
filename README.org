@@ -1,5 +1,5 @@
 * JML
-Line of computers built from scrap.
+Line of computers built mostly from scrap.
 
 ** Table of Contents :toc:
 - [[#jml][JML]]
@@ -18,8 +18,8 @@ Each family of computers is designed so that all software is fully backwards
 compatible between models.
 
 ** Parts
-All parts have been scrapped from other computers/electronics. Many of these
-parts are from very old computers and are no longer on the market.
+Almost all parts have been scrapped from other computers/electronics. Many of
+these parts are from very old computers and are no longer on the market.
 
 Modern day equivalents do exist, but it is necessary to be cautious about
 differing pin-outs. It may be necessary to design a new PCB for a modern

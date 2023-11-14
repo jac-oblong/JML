@@ -1,0 +1,70 @@
+#+title: JML-8-Mini
+
+#+CAPTION: JML-8-Mini PCB
+#+ATTR_HTML: :width 600px
+[[file:./schematic/jml-8-mini-PCB.png]]
+
+* Table of Contents :toc:
+- [[#description--features][Description & Features]]
+- [[#usage][Usage]]
+  - [[#creating-your-own][Creating Your Own]]
+- [[#design-specifics][Design Specifics]]
+
+* Description & Features
+The *JML-8-Mini* is an 8-bit computer using the Z80 microprocessor. The computer
+has a built-in BASIC interpreter as well as a simple memory monitor.
+
+*Features:*
+ - 8k of ROM (BASIC and Memory Monitor)
+ - 32k of RAM
+ - BASIC Interpreter (Based on Grant Searle's Version of NASCOM BASIC)
+ - UART Interface (Z80 SIO & Z80 CTC)
+ - Extra Serial I/0 Port (Z80 SIO CHB)
+ - 3 Extra Counter/Timer Circuits (Z80 CTC CH1-3)
+
+* Usage
+The barrel jack can be used to power the board. It requires 5V DC
+center-positive.
+
+Since the computer communicates over UART, a device that accepts serial
+communication is needed. If using a computer, an FTDI device or even a
+micro-controller can be used to convert from UART to USB. Any terminal
+application should work for communication. The UART protocol used is 8-N-1.
+The order of the UART connection (starting on the end of the connector with
+the black dot) is GND-TX-RX-CTS, NOTE: those labels are from the viewpoint
+of an external device, not the JML-8-Mini.
+
+On boot-up, the computer will be placed in the memory monitor program. BASIC
+can be entered by pressing 'B' (case does not matter). However, there are
+three other commands:
+ - _'W'_: Write data into memory. After pressing 'W', enter the location in
+   memory to write to in hex (4 digits required). Then, write the data to be
+   written starting at that location. All data must be formatted in hex (2
+   digits) and separated by another character (the character does not matter).
+   A newline (carriage return)(0x0D) will signify that the write has ended.
+ - _'R'_: Read data from memory. After pressing 'R', enter the location in
+   memory to read from in hex (4 digits required). Then enter a dummy
+   character, followed by the location in memory to stop reading from in hex.
+   A newline will begin printing the data (in hex).
+ - _'J'_: Jump to a location in memory. After pressing 'J', enter the location
+   in memory to jump to in hex (4 digits required). The computer will execute
+   an unconditional jump to that location.
+
+** Creating Your Own
+The [[file:./schematic/jml-8-mini-schematic.pdf][schematic]] and [[file:./schematic/gerber][gerbers]] are both available in this repository. Be careful
+when sourcing components; the CD74HCT4514E is a 4-16 line decoder, but does
+not have the same footprint as other 4-16 decoders. A way to change
+pin-outs may be necessary.
+
+The BASIC code can be obtained from [[searle.wales][Grant Searle's Website]]. There are only
+two changes that need to be made:
+  1) Around line 130, there is a line with ~.org 04000H~, this needs to be
+     changed to ~.org 00380H~
+  2) At the very end of the file, the ~.end~ should be removed
+Everything else can stay the same. The file should be named "basic.s" and
+placed in the [[file:./src/][src]] directory.
+
+There is [[file:../related-projects/][Arduino-based EEPROM programmer]] that may be helpful.
+
+* Design Specifics
+
