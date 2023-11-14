@@ -37,16 +37,16 @@ of an external device, not the JML-8-Mini.
 On boot-up, the computer will be placed in the memory monitor program. BASIC
 can be entered by pressing 'B' (case does not matter). However, there are
 three other commands:
- - *'W'*: Write data into memory. After pressing 'W', enter the location in
+ - *W*: Write data into memory. After pressing 'W', enter the location in
    memory to write to in hex (4 digits required). Then, write the data to be
    written starting at that location. All data must be formatted in hex (2
    digits) and separated by another character (the character does not matter).
    A newline (carriage return)(0x0D) will signify that the write has ended.
- - *'R'*: Read data from memory. After pressing 'R', enter the location in
+ - *R*: Read data from memory. After pressing 'R', enter the location in
    memory to read from in hex (4 digits required). Then enter a dummy
    character, followed by the location in memory to stop reading from in hex.
    A newline will begin printing the data (in hex).
- - *'J'*: Jump to a location in memory. After pressing 'J', enter the location
+ - *J*: Jump to a location in memory. After pressing 'J', enter the location
    in memory to jump to in hex (4 digits required). The computer will execute
    an unconditional jump to that location.
 
@@ -56,7 +56,7 @@ when sourcing components; the CD74HCT4514E is a 4-16 line decoder, but does
 not have the same footprint as other 4-16 decoders. A way to change
 pin-outs may be necessary.
 
-The BASIC code can be obtained from [[www.searle.wales][Grant Searle's Website]]. There are only
+The BASIC code can be obtained from [[http://searle.wales][Grant Searle's Website]]. There are only
 two changes that need to be made:
   1) Around line 130, there is a line with ~.org 04000H~, this needs to be
      changed to ~.org 00380H~
