@@ -14,9 +14,6 @@ designated by a number, for example the *JML-8* family of computer. Each model
 in that family is further distinguished by a name, for example the
 *JML-8-Mini*.
 
-Each family of computers is designed so that all software is fully backwards
-compatible between models.
-
 ** Parts
 Almost all parts have been scrapped from other computers/electronics. Many of
 these parts are from very old computers and are no longer on the market.
