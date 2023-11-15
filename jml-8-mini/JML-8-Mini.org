@@ -29,10 +29,10 @@ center-positive.
 Since the computer communicates over UART, a device that accepts serial
 communication is needed. If using a computer, an FTDI device or even a
 micro-controller can be used to convert from UART to USB. Any terminal
-application should work for communication. The UART protocol used is 8-N-1.
-The order of the UART connection (starting on the end of the connector with
-the black dot) is GND-TX-RX-CTS, NOTE: those labels are from the viewpoint
-of an external device, not the JML-8-Mini.
+application should work for communication. The UART protocol used is 8-N-1
+at 9600 baud. The order of the UART connection (starting on the end of the
+connector with the black dot) is GND-TX-RX-CTS, NOTE: those labels are from
+the viewpoint of an external device, not the JML-8-Mini.
 
 On boot-up, the computer will be placed in the memory monitor program. BASIC
 can be entered by pressing 'B' (case does not matter). However, there are
