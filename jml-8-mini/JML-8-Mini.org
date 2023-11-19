@@ -51,9 +51,9 @@ three other commands:
    an unconditional jump to that location.
 
 ** Creating Your Own
-The [[file:./schematic/jml-8-mini-schematic.pdf][schematic]] and [[file:./schematic/gerber][gerbers]] are both available in this repository. Be careful
-when sourcing components; the CD74HCT4514E is a 4-16 line decoder, but does
-not have the same footprint as other 4-16 decoders. A way to change
+The [[file:./schematic/jml-8-mini-schematic.pdf][schematic]], [[file:./schematic/gerber][gerbers]] and [[file:./case/][case]] are all available in this repository. Be
+careful when sourcing components; the CD74HCT4514E is a 4-16 line decoder,
+but does not have the same footprint as other 4-16 decoders. A way to change
 pin-outs may be necessary.
 
 The BASIC code can be obtained from [[http://searle.wales][Grant Searle's Website]]. There are only

@@ -1,6 +1,10 @@
 * JML
 Line of computers built mostly from scrap.
 
+#+CAPTION: JML Logo
+#+ATTR_HTML: :width 600px
+[[file:./docs/JML-logo-vintage-transparent.png]]
+
 ** Table of Contents :toc:
 - [[#jml][JML]]
   - [[#design][Design]]
