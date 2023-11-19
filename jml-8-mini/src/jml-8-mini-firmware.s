@@ -87,18 +87,30 @@ monitor:
   cp 'W'
   jr z, monitor_write
   cp 'J'
-  jr z, monitor_jump
+  jp z, monitor_jump
   jr monitor                    ; retry if response not recognized
 
+MONITOR_READ_MSG:
+  .text LF,CR,"READING, ENTER {START ADDR}:{END ADDR}",CR,LF,NUL
 monitor_read:
+  ld HL, MONITOR_READ_MSG
+  call f_uart_put_string
   ld A, 0x00
   jr monitor_func
 
+MONITOR_WRITE_MSG:
+  .text LF,CR,"WRITING, ENTER {START ADDR} {DATA} {DATA}...\n",CR,LF,NUL
 monitor_write:
+  ld HL, MONITOR_WRITE_MSG
+  call f_uart_put_string
   ld A, 0x01
   jr monitor_func
 
+MONITOR_JUMP_MSG:
+  .text LF,CR,"JUMPING, ENTER {ADDR}",CR,LF,NUL
 monitor_jump:
+  ld HL, MONITOR_JUMP_MSG
+  call f_uart_put_string
   ld A, 0x02
   jr monitor_func
 
@@ -112,7 +124,7 @@ monitor_func:
   jp nz, read_or_write
 block_jump_newline:
   call f_uart_get_byte          ; wait for user to hit enter to actually jump
-  cp LF
+  cp CR
   jr nz, block_jump_newline
   jp HL                         ; if so, then jump
 read_or_write:
@@ -122,13 +134,15 @@ read_or_write:
   ;; now doing read operations
   ld BC, HL                     ; transfer starting point into BC
   call f_uart_get_byte          ; user will enter 'random' character between
-                                ; start and end locations
+  call f_uart_put_byte          ; start and end locations
   call f_load_HL_hex            ; load ending point into HL
 block_read_newline:
   call f_uart_get_byte          ; wait for user to hit enter to start printing
-  cp LF
+  cp CR
   jr nz, block_read_newline
   call f_uart_put_byte          ; print out the newline
+  ld A, LF
+  call f_uart_put_byte
   ld E, 8                       ; how many bytes to print on each line
 read_loop_outer:
   ld A, B                       ; print out BC in hex
@@ -178,12 +192,14 @@ exit_read:
 
 write:
   call f_uart_get_byte          ; space between address and data doesn't matter
+  call f_uart_put_byte
 write_loop:
   call f_load_A_hex             ; get value entered by user
   ld (HL),A                     ; load that data into memory
   inc HL
   call f_uart_get_byte          ; did user enter space or newline?
-  cp LF
+  call f_uart_put_byte
+  cp CR
   jr nz, write_loop             ; if not newline, more data coming
   jp monitor                    ; done with write, back to monitor
 
@@ -214,21 +230,21 @@ f_load_HL_hex:
 f_load_A_hex:
   push BC
 
-  ld B, 0                       ; B will keep track of loop (first or second)
-                                ; C will be a copy of A
+  ld BC, 0                      ; B will keep track of loop (first or second)
 get_hex_loop:
   call f_uart_get_byte          ; get newest byte
   call f_uart_put_byte          ; echo it back
   cp '0'
-  jr c, get_hex_loop            ; not hex if less than '0'
+  jr c, not_hex                 ; not hex if less than '0'
   cp ':'
   jr c, numerical_hex           ; between '0' and '9', so a numerical hex number
   and 0x5F                      ; capitalize (we know either letter or not hex)
   cp 'A'
-  jr c, get_hex_loop            ; not hex if less than 'A'
+  jr c, not_hex                 ; not hex if less than 'A'
   cp 'G'
   jr c, alpha_hex               ; between 'A' and 'F', so alpha hex number
   ;; data was not hex, print out error message and reset (jump to 0x0000)
+not_hex:
   ld HL, NOT_HEX_ERROR
   call f_uart_put_string
   jp 0x0000
@@ -245,7 +261,7 @@ alpha_hex:
 
 store_value:
   bit 0, B                      ; is B even or odd? (0 or 1?)
-  jr z, is_odd
+  jr nz, is_odd
   sla A                         ; shift low nibble of A into high nibble
   sla A
   sla A
