@@ -36,7 +36,7 @@ the viewpoint of an external device, not the JML-8-Mini.
 
 On boot-up, the computer will be placed in the memory monitor program. BASIC
 can be entered by pressing 'B' (case does not matter). However, there are
-three other commands:
+four other commands:
  - *W*: Write data into memory. After pressing 'W', enter the location in
    memory to write to in hex (4 digits required). Then, write the data to be
    written starting at that location. All data must be formatted in hex (2
@@ -49,6 +49,7 @@ three other commands:
  - *J*: Jump to a location in memory. After pressing 'J', enter the location
    in memory to jump to in hex (4 digits required). The computer will execute
    an unconditional jump to that location.
+ - *C*: Clear the screen.
 
 ** Creating Your Own
 The [[file:./schematic/jml-8-mini-schematic.pdf][schematic]], [[file:./schematic/gerber][gerbers]] and [[file:./case/][case]] are all available in this repository. Be
