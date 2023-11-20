@@ -39,6 +39,7 @@ BASIC:  equ 0x0380
 NUL:  equ 0x00
 TAB:  equ 0x09
 LF:   equ 0x0A
+FF:   equ 0x0C
 CR:   equ 0x0D
 DEL:  equ 0x7F
 
@@ -62,7 +63,7 @@ _reset:
   jp f_uart_check_input
 
 INIT_MESSAGE:
-.text LF,CR,"(B)ASIC, (R)EAD MEM, (W)RITE MEM, (J)UMP MEM",LF,CR,NUL
+.text LF,CR,LF,CR,LF,CR,"(B)ASIC, (R)EAD MEM, (W)RITE MEM, (J)UMP MEM, (C)LEAR",LF,CR,NUL
 
 init:
   ;; stackpointer
@@ -73,6 +74,10 @@ init:
   call f_init_ctc
   call f_init_sio
   call f_uart_rx_on
+
+  ;; clear screen
+  ld A, FF
+  call f_uart_put_byte
 
 monitor:
   ld HL, INIT_MESSAGE           ; print out init message
@@ -88,6 +93,8 @@ monitor:
   jr z, monitor_write
   cp 'J'
   jp z, monitor_jump
+  cp 'C'
+  jp z, monitor_clear
   jr monitor                    ; retry if response not recognized
 
 MONITOR_READ_MSG:
@@ -113,6 +120,11 @@ monitor_jump:
   call f_uart_put_string
   ld A, 0x02
   jr monitor_func
+
+monitor_clear:
+  ld A, FF
+  call f_uart_put_byte
+  jp monitor
 
 monitor_func:
   push AF
@@ -143,33 +155,39 @@ block_read_newline:
   call f_uart_put_byte          ; print out the newline
   ld A, LF
   call f_uart_put_byte
-  ld E, 8                       ; how many bytes to print on each line
+  ld E, 16                       ; how many bytes to print on each line
 read_loop_outer:
   ld A, B                       ; print out BC in hex
   call f_print_A_hex
   ld A, C
   call f_print_A_hex
   ld A, ':'                     ; print out ":\t"
-  call f_print_A_hex
+  call f_uart_put_byte
   ld A, TAB
-  call f_print_A_hex
+  call f_uart_put_byte
   ;; print actual data in memory
   ld D, 0                       ; will keep track of how many times looped
 read_loop_inner_hex:
   ld A, (BC)
   call f_print_A_hex            ; print out all data in hex with each byte
   ld A, ' '                     ; separated by spaces
-  call f_print_A_hex
+  call f_uart_put_byte
   inc D                         ; increment # of loops
   inc BC                        ; increment memory address pointer
   ld A, D
-  cp E                         ; have we looped the correct # of times?
+  cp 8                          ; print out tab?
+  jp nz, read_no_tab
+  ld A, TAB
+  call f_uart_put_byte
+  ld A, D
+read_no_tab:
+  cp E                          ; have we looped the correct # of times?
   jr nz, read_loop_inner_hex
   ;; end of this line
   ld A, LF                      ; print newline
-  call f_print_A_hex
+  call f_uart_put_byte
   ld A, CR
-  call f_print_A_hex
+  call f_uart_put_byte
   ;; compare BC and HL
   push HL                       ; save because we will modify
   scf
@@ -181,7 +199,7 @@ read_loop_inner_hex:
   ld A, L
   cp 0
   jr z, exit_read               ; done with read
-  cp 8
+  cp 16
   jr nc, read_loop_outer_again  ; difference is greater than 8 so keep chugging
   ld E, L                       ; diff less than 8, so don't print all 8
 read_loop_outer_again:
