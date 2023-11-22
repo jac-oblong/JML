@@ -7,6 +7,8 @@ related-projects/AT28C-EEPROM-Programmer-Arduino
 related-projects/AT28C-EEPROM-Programmer-Arduino/**
 related-projects/zasm
 related-projects/zasm/**
+related-projects/Teensy_Blaster
+related-projects/Teensy_Blaster/**
 docs/datasheet
 docs/datasheet/**
 **/*-backups/
