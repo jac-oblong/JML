@@ -5,20 +5,22 @@ Line of computers built mostly from scrap.
 #+ATTR_HTML: :width 600px :style margin-left: auto; margin-right: auto;
 [[file:./docs/JML-logo-vintage-transparent.png]]
 
-** Table of Contents :toc:
+* Table of Contents :toc:
 - [[#jml][JML]]
-  - [[#design][Design]]
-  - [[#parts][Parts]]
-  - [[#folder-organization][Folder Organization]]
-  - [[#families][Families]]
+- [[#design][Design]]
+- [[#parts][Parts]]
+- [[#folder-organization][Folder Organization]]
+- [[#families][Families]]
+  - [[#jml-8][JML-8]]
+  - [[#jml-6502][JML-6502]]
 
-** Design
+* Design
 The line of *JML* computers is broken into "families". Each family is
 designated by a number, for example the *JML-8* family of computer. Each model
 in that family is further distinguished by a name, for example the
 *JML-8-Mini*.
 
-** Parts
+* Parts
 Almost all parts have been scrapped from other computers/electronics. Many of
 these parts are from very old computers and are no longer on the market.
 
@@ -26,26 +28,26 @@ Modern day equivalents do exist, but it is necessary to be cautious about
 differing pin-outs. It may be necessary to design a new PCB for a modern
 chip, or at least a way to change pin-out.
 
-** Folder Organization
+* Folder Organization
 Information about the different model computers can be found in any
 directory titled *JML-{family}-{model}*.
 
 Various other [[file:related-projects][projects]] were useful in designing the computers. More
 information can be found in the directory linked.
 
-** Families
+* Families
 Below is a list of all families with a brief description of each family.
 
 - [[#jml-8][JML-8]]
 - [[#jml-6502][JML-6502]]
 
-*** JML-8
+** JML-8
 This is a family of 8-bit microcomputers designed around the Z80
 microprocessor.
 
 - [[#jml-8-mini][JML-8-Mini]]
 
-**** JML-8-Mini
+*** JML-8-Mini
 [[file:jml-8-mini][This model]] uses a UART serial port to communicate with a terminal.
 An FTDI chip can be used to send data from a computer to the
 Z80.
@@ -56,13 +58,13 @@ memory locations, write values to memory locations and transfer
 program control to a specific memory location. Additionally, there is a built
 in BASIC interpreter.
 
-*** JML-6502
+** JML-6502
 This is a family of 8-bit microcomputers designed around the 6502
 microprocessor.
 
 - [[#jml-6502-mini][JML-6502-Mini]]
 
-**** JML-6502-Mini
+*** JML-6502-Mini
 ⚠ THIS MODEL IS STILL UNDER DEVELOPMENT.
 
 [[file:jml-6502-mini][This model]] uses a UART serial port to communicate with a terminal.
