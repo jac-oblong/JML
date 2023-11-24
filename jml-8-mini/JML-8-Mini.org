@@ -8,7 +8,7 @@
 - [[#description--features][Description & Features]]
 - [[#usage][Usage]]
   - [[#creating-your-own][Creating Your Own]]
-- [[#design-specifics][Design Specifics]]
+- [[#design-overview][Design Overview]]
 
 * Description & Features
 The *JML-8-Mini* is an 8-bit computer using the Z80 microprocessor. The computer
@@ -67,5 +67,21 @@ placed in the [[file:./src/][src]] directory.
 
 There is [[file:../related-projects/][Arduino-based EEPROM programmer]] that may be helpful.
 
-* Design Specifics
+* Design Overview
+The *JML-8-Mini*'s memory map can be seen below.
 
+#+CAPTION: JML-8-Mini Memory Map
+#+ATTR_HTML: :width 400px
+[[file:./docs/memory-map.png]]
+
+The section of memory between ~0x1FFF~ and ~0x8000~ is a repetition of the ROM
+because the ROM will still be enabled.
+
+The I/O memory map is shown below.
+
+#+CAPTION: JML-8-Mini Memory Map
+#+ATTR_HTML: :width 300px
+[[file:./docs/io-map.png]]
+
+The extra headers on the board (address decoding, Z80 lines, SIO-CHB) allow
+for more features to be added as I/O.
