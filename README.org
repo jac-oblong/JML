@@ -68,8 +68,7 @@ microprocessor.
 ⚠ THIS MODEL IS STILL UNDER DEVELOPMENT.
 
 [[file:jml-6502-mini][This model]] uses a UART serial port to communicate with a terminal.
-An FTDI chip can be used to send data from a computer to the
-Z80.
+An FTDI chip can be used to send data from a computer to the 6502.
 
 Very similar to the [[#jml-8-mini][JML-8-Mini]], the "operating system" this model
 runs only allows for very simple commands. These commands allow the
