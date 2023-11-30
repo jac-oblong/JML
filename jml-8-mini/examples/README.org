@@ -1,0 +1,9 @@
+* EXAMPLES
+This directory contains some example programs that can be run on
+the *JML-8-Mini*. Both the source code and a formatted text file
+are provided. The text file makes loading the program easier,
+as a serial monitor can use the file as input, instead of manually
+typing in the program. Be sure to increase the time between sent
+characters and the time between lines when doing this so that
+the BASIC interpreter/memory monitor has enough time to process
+the incoming data.

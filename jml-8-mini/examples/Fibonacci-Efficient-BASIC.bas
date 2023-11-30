@@ -1,0 +1,16 @@
+10 DIM S(25)
+20 PRINT "Welcome to the Efficient Fibonacci Calculator"
+30 INPUT "Fin(N)  N";N
+35 IF N >= 0 THEN 40
+36 PRINT "N must be positive"
+37 GOTO 20
+40 GOSUB 100
+50 PRINT "Fib("N") ="F
+60 END
+100 IF N = 0 THEN F=0:RETURN
+110 IF N <= 2 THEN F=1:RETURN
+120 F1=1: F2=1
+130 FOR I=2 TO N
+140 F=F1+F2: F1=F2: F2=F
+150 NEXT
+160 RETURN
