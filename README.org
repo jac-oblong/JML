@@ -32,9 +32,6 @@ chip, or at least a way to change pin-out.
 Information about the different model computers can be found in any
 directory titled *JML-{family}-{model}*.
 
-Various other [[file:related-projects][projects]] were useful in designing the computers. More
-information can be found in the directory linked.
-
 * Families
 Below is a list of all families with a brief description of each family.
 
