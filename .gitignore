@@ -3,12 +3,8 @@ programs/**
 **/*.out
 **/*.bin
 **/*.lst
-related-projects/AT28C-EEPROM-Programmer-Arduino
-related-projects/AT28C-EEPROM-Programmer-Arduino/**
-related-projects/zasm
-related-projects/zasm/**
-related-projects/Teensy_Blaster
-related-projects/Teensy_Blaster/**
+related-projects/**
+related-projects
 docs/datasheet
 docs/datasheet/**
 **/*-backups/
