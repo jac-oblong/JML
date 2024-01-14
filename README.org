@@ -15,6 +15,7 @@ Line of computers built mostly from scrap.
 - [[#folder-organization][Folder Organization]]
 - [[#families][Families]]
   - [[#jml-8][JML-8]]
+  - [[#jml-6502][JML-6502]]
 
 * Design
 The line of *JML* computers is broken into "families". Each family is
@@ -38,6 +39,7 @@ directory titled *JML-{family}-{model}*.
 Below is a list of all families with a brief description of each family.
 
 - [[#jml-8][JML-8]]
+- [[#jml-6502][JML-6502]]
 
 ** JML-8
 This is a family of 8-bit microcomputers designed around the Z80
@@ -55,3 +57,21 @@ commands. These commands allow the user to read the values at
 memory locations, write values to memory locations and transfer
 program control to a specific memory location. Additionally, there is a built
 in BASIC interpreter.
+
+** JML-6502
+This is a family of 8-bit microcomputers designed around the 6502
+microprocessor.
+
+- [[#jml-6502-mini][JML-6502-Mini]]
+
+*** JML-6502-Mini
+⚠ THIS MODEL IS STILL UNDER DEVELOPMENT.
+
+[[file:jml-6502-mini][This model]] uses a UART serial port to communicate with a terminal.
+An FTDI chip can be used to send data from a computer to the 6502.
+
+Very similar to the [[#jml-8-mini][JML-8-Mini]], the "operating system" this model
+runs only allows for very simple commands. These commands allow the
+user to read the values at memory locations, write values to memory
+locations and transfer program control to a specific memory location.
+Additionally, there is a built in BASIC interpreter.
