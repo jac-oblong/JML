@@ -1,3 +1,6 @@
+This branch saves the state of the JML-6502-Mini before it was abandoned.
+The design was completed, but no prototype/pcb was ever created or tested.
+
 * JML
 Line of computers built mostly from scrap.
 
