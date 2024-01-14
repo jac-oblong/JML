@@ -1,0 +1,5 @@
+* Peripherals
+This directory contains information regarding custom peripherals.
+Some of the peripherals are designed as add-ons/expansions to other
+models, and others are designed as entirely distinct boards that are
+in some way related to the *JML* project.
