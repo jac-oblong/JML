@@ -1,0 +1,7 @@
+* JML-8-Mini VGA
+
+#+ATTR_HTML: :width 600px
+[[./schematic/jml-8-mini-vga.png]]
+
+This provides a VGA interface to the JML-8-Mini via a Tang Nano 9k FPGA.
+The daughterboard plugs into the the Z80 header pins on the JML-8-Mini.
