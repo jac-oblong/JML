@@ -18,3 +18,5 @@ lib/kicad/*.step
 jml-8-mini/schematic/*.step
 **/basic.s
 **/*.FCBak
+**/*.o
+**/*.fs
