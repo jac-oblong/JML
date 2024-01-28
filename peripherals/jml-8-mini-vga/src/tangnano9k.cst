@@ -1,0 +1,9 @@
+IO_LOC "clk" 33;
+
+IO_LOC "vsync" 25;
+IO_LOC "hsync" 26;
+
+IO_LOC "red" 27;
+IO_LOC "green" 28;
+IO_LOC "blue" 29;
+IO_LOC "lum" 30;
