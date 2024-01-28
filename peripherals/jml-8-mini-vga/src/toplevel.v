@@ -9,33 +9,36 @@ module toplevel (
     output lum
 );
 
-   reg [9:0] hori_counter = 0;
-   reg [5:0] quart_counter = 0;
-   reg [3:0] counter = 0;
+   wire pixel;
+   wire visible;
+   reg [7:0] character = 65;
+   wire [9:0] vertcount;
+   wire [9:0] horicount;
 
-   always @(posedge clk) begin
-      if (hori_counter == 799) begin
-         hori_counter <= 0;
-         quart_counter <= 0;
-         counter <= 0;
-      end else begin
-         hori_counter <= hori_counter + 1;
-         if (quart_counter == 39) begin
-            quart_counter <= 0;
-            counter <= counter + 1;
-         end else quart_counter <= quart_counter + 1;
-      end
+   assign red   = pixel;
+   assign green = pixel;
+   assign blue  = pixel;
+   assign lum   = pixel;
+
+   always @(posedge horicount[2]) begin
+      if (character == 65) character <= 32;
+      if (character == 32) character <= 65;
    end
 
-   assign red   = counter[0] ? counter[0] : 1'bZ;
-   assign green = counter[1] ? counter[1] : 1'bZ;
-   assign blue  = counter[2] ? counter[2] : 1'bZ;
-   assign lum   = counter[3] ? counter[3] : 1'bZ;
-
    signalgen #() signal_generator (
-       .clk  (clk),
+       .clk(clk),
        .vsync(vsync),
-       .hsync(hsync)
+       .hsync(hsync),
+       .visible(visible),
+       .vertcount(vertcount),
+       .horicount(horicount)
+   );
+
+   chargen #() character_generator (
+       .clk(clk),
+       .character(character),
+       .vertcount(vertcount[2:0]),
+       .pixel(pixel)
    );
 
 endmodule
