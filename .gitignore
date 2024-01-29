@@ -20,3 +20,4 @@ jml-8-mini/schematic/*.step
 **/*.FCBak
 **/*.o
 **/*.fs
+**/waveform/*

@@ -11,7 +11,7 @@ module toplevel (
 
    wire pixel;
    wire visible;
-   reg [7:0] character = 65;
+   wire [7:0] character;
    wire [9:0] vertcount;
    wire [9:0] horicount;
 
@@ -19,11 +19,6 @@ module toplevel (
    assign green = pixel;
    assign blue  = pixel;
    assign lum   = pixel;
-
-   always @(posedge horicount[2]) begin
-      if (character == 65) character <= 32;
-      if (character == 32) character <= 65;
-   end
 
    signalgen #() signal_generator (
        .clk(clk),
@@ -34,11 +29,18 @@ module toplevel (
        .horicount(horicount)
    );
 
-   chargen #() character_generator (
+   pixelgen #() character_generator (
        .clk(clk),
        .character(character),
-       .vertcount(vertcount[2:0]),
+       .vertoffset(vertcount[2:0]),
        .pixel(pixel)
+   );
+
+   videocont #() video_controller (
+       .visible  (visible),
+       .horicount(horicount[9:3]),
+       .vertcount(vertcount[8:3]),
+       .character(character)
    );
 
 endmodule
