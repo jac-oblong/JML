@@ -15,7 +15,7 @@ WAVES			=		$(TESTS:$(TB_DIR)/%_tb.v=$(WAVE_DIR)/%.vcd)
 all : make_clean toplevel.fs
 
 # Synthesis
-toplevel.json : $(SRCS)
+toplevel.json : $(SRCS) charrom.txt videoram.txt
 	yosys -q -p "read_verilog $(SRCS); synth_gowin -top toplevel -json toplevel.json"
 
 # Place and Route
