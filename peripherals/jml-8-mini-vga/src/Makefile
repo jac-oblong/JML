@@ -20,7 +20,7 @@ toplevel.json : $(SRCS) charrom.txt videoram.txt
 
 # Place and Route
 toplevel_pnr.json : toplevel.json
-	nextpnr-gowin -q --json toplevel.json --freq 27 --write \
+	nextpnr-gowin -q --json toplevel.json --freq 40 --write \
 		toplevel_pnr.json --device ${DEVICE} --family ${FAMILY} \
 		--cst ${BOARD}.cst
 

@@ -9,11 +9,12 @@ module toplevel (
     output lum
 );
 
+   `include "vgaspecs.vh"
+
    wire pixel;
    wire visible;
-   wire [7:0] character;
-   wire [9:0] vertcount;
-   wire [9:0] horicount;
+   wire [HCOUNT_BITSREQ:0] horicount;
+   wire [VCOUNT_BITSREQ:0] vertcount;
 
    assign red   = pixel;
    assign green = pixel;
@@ -25,22 +26,15 @@ module toplevel (
        .vsync(vsync),
        .hsync(hsync),
        .visible(visible),
+       .horicount(horicount),
+       .vertcount(vertcount)
+   );
+
+   videoram #() video_ram (
+       .visible(visible),
+       .horicount(horicount),
        .vertcount(vertcount),
-       .horicount(horicount)
-   );
-
-   pixelgen #() character_generator (
-       .clk(clk),
-       .character(character),
-       .vertoffset(vertcount[2:0]),
        .pixel(pixel)
-   );
-
-   videocont #() video_controller (
-       .visible  (visible),
-       .horicount(horicount[9:3]),
-       .vertcount(vertcount[8:3]),
-       .character(character)
    );
 
 endmodule

@@ -1,7 +1,7 @@
 `timescale 1 ns / 1 ns
 
 module test ();
-   reg  clk = 1;
+   reg  clk = 0;
    wire hsync;
    wire vsync;
    wire red;
