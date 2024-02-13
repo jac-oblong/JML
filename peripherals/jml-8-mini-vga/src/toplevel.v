@@ -1,5 +1,9 @@
 module toplevel (
     input clk,
+    input write,
+    input iorq,
+    input [1:0] chipsel,
+    input [7:0] data,
 
     output vsync,
     output hsync,
@@ -13,6 +17,8 @@ module toplevel (
 
    wire pixel;
    wire visible;
+   wire datavalid;
+   wire [7:0] configdata;
    wire [HCOUNT_BITSREQ:0] horicount;
    wire [VCOUNT_BITSREQ:0] vertcount;
 
@@ -35,6 +41,16 @@ module toplevel (
        .horicount(horicount),
        .vertcount(vertcount),
        .pixel(pixel)
+   );
+
+   z80interface #() z80_interface (
+       .clk(clk),
+       .write(write),
+       .iorq(iorq),
+       .chipsel(chipsel),
+       .datain(data),
+       .dataout(configdata),
+       .valid(datavalid)
    );
 
 endmodule
