@@ -23,6 +23,5 @@ localparam VSYNC_END = VSYNC_BEGIN + VSYNCPULSE;
 
 localparam HTILES = HRESOLUTION / 8;
 localparam VTILES = VRESOLUTION / 8;
-
-localparam BUFFER_SIZE = 39;  // 39:0 for a total of 40 bits
-localparam BUFFER_BITS = $clog2(BUFFER_SIZE) - 1;
+localparam HTILES_BITSREQ = $clog2(HTILES - 1) - 1;
+localparam VTILES_BITSREQ = $clog2(VTILES - 1) - 1;
