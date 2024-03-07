@@ -25,3 +25,6 @@ localparam HTILES = HRESOLUTION / 8;
 localparam VTILES = VRESOLUTION / 8;
 localparam HTILES_BITSREQ = $clog2(HTILES - 1) - 1;
 localparam VTILES_BITSREQ = $clog2(VTILES - 1) - 1;
+
+localparam DUALPORT_SIZE = 127;
+localparam DUALPORT_BITSREQ = $clog2(DUALPORT_SIZE) - 1;
