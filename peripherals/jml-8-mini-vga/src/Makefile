@@ -11,20 +11,18 @@ TESTS		=		$(wildcard $(TB_DIR)/*_tb.v)
 TEST_OBJS	=		$(TESTS:$(TB_DIR)/%_tb.v=%_tb.o)
 WAVES		=		$(TESTS:$(TB_DIR)/%_tb.v=$(WAVE_DIR)/%.vcd)
 
-MSG_FILE	=		./msg.txt
-
 
 all : make_clean toplevel.fs
 
 # Synthesis
 toplevel.json : $(SRCS) charrom.txt videoram.txt
-	yosys -p "read_verilog $(SRCS); synth_gowin -top toplevel -json toplevel.json" >> ${MSG_FILE}
+	yosys -q -p "read_verilog $(SRCS); synth_gowin -top toplevel -json toplevel.json"
 
 # Place and Route
 toplevel_pnr.json : toplevel.json
-	nextpnr-gowin --json toplevel.json --freq 40 --write \
+	nextpnr-gowin -q --json toplevel.json --freq 40 --write \
 		toplevel_pnr.json --device ${DEVICE} --family ${FAMILY} \
-		--cst ${BOARD}.cst >> ${MSG_FILE}
+		--cst ${BOARD}.cst
 
 # Generate Bitstream
 toplevel.fs : toplevel_pnr.json
