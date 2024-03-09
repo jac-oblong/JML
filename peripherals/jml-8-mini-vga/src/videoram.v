@@ -14,7 +14,7 @@ module videoram (
 
    // videoram holds all which character to be displayed
    reg [7:0] ram[VTILES-1:0][HTILES-1:0];
-   initial $readmemb("videoram.txt", ram, 0);
+   initial $readmemh("videoram.txt", ram, 0);
 
    wire [HTILES_BITSREQ:0] horioffset;
    wire [VTILES_BITSREQ:0] vertoffset;
