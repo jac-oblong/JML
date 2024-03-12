@@ -1,6 +1,6 @@
 module pixelgen (
     input                    clk,
-    input                    visible,
+    input                    prepline,
     input [HCOUNT_BITSREQ:0] nextline,
     input [HCOUNT_BITSREQ:0] horicount,
 
@@ -27,7 +27,7 @@ module pixelgen (
    );
 
    videoram #() video_ram (
-       .visible  (visible),
+       .prepline (prepline),
        .horicount(horicount),
        .vertcount(nextline),
        .character(character)
@@ -36,8 +36,8 @@ module pixelgen (
    dualport #() dual_port_ram (
        .w_clk (clk),
        .r_clk (clk),
-       .w_en  (visible),
-       .r_en  (visible),
+       .w_en  (prepline),
+       .r_en  (prepline),
        .w_addr(w_addr),
        .r_addr(r_addr),
        .w_data(pixels_nextline),
@@ -47,18 +47,20 @@ module pixelgen (
    always @(posedge clk) counter <= counter + 1;
 
    always @(posedge clk) begin
-      if (counter == 4) begin
+      if (prepline && counter == 4) begin
          w_addr <= w_addr + 1;
          r_addr <= r_addr + 1;
       end
    end
 
    always @(posedge clk) begin
-      if (counter == 0) begin
-         pixels <= {pixels_thisline, pixels[8:1]};
-      end else begin
-         pixels <= pixels >> 1;
-      end
+      if (prepline) begin
+         if (counter == 0) begin
+            pixels <= {pixels_thisline, pixels[8:1]};
+         end else begin
+            pixels <= pixels >> 1;
+         end
+      end else pixels <= 0;
    end
 
 endmodule
