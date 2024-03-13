@@ -5,7 +5,7 @@ module charrom (
     output [7:0] pixels
 );
 
-   reg [7:0] chars[256][8];
+   reg [7:0] chars[0:255][0:7];
 
    initial $readmemh("charrom.txt", chars, 0);
 

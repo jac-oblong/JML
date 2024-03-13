@@ -17,7 +17,7 @@ module toplevel (
 
    wire pixel;
    wire visible;
-   wire prepline;
+   wire startline;
    wire [HCOUNT_BITSREQ:0] horicount;
    wire [VCOUNT_BITSREQ:0] vertcount;
 
@@ -31,16 +31,17 @@ module toplevel (
        .vsync(vsync),
        .hsync(hsync),
        .visible(visible),
-       .prepline(prepline),
+       .startline(startline),
        .horicount(horicount),
        .vertcount(vertcount)
    );
 
    pixelgen #() pixel_generator (
        .clk(clk),
-       .prepline(prepline),
+       .visible(visible),
+       .startline(startline),
        .horicount(horicount),
-       .nextline(vertcount),
+       .vertcount(vertcount),
        .pixel(pixel)
    );
 

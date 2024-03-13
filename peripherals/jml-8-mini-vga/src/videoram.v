@@ -3,7 +3,7 @@
  */
 
 module videoram (
-    input                    prepline,
+    input                    visible,
     input [HCOUNT_BITSREQ:0] horicount,
     input [VCOUNT_BITSREQ:0] vertcount,
 
@@ -13,7 +13,7 @@ module videoram (
    `include "vgaspecs.vh"
 
    // videoram holds all which character to be displayed
-   reg [7:0] ram[VTILES][HTILES];
+   reg [7:0] ram[0:VTILES-1][0:HTILES-1];
    initial $readmemh("videoram.txt", ram, 0);
 
    wire [HTILES_BITSREQ:0] horioffset;
@@ -22,6 +22,6 @@ module videoram (
    assign horioffset = horicount[HCOUNT_BITSREQ:3];
    assign vertoffset = vertcount[VCOUNT_BITSREQ-1:3];
 
-   assign character  = prepline ? ram[vertoffset][horioffset] : 0;
+   assign character  = visible ? ram[vertoffset][horioffset] : 0;
 
 endmodule

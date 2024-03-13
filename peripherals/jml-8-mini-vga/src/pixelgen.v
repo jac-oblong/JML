@@ -1,8 +1,9 @@
 module pixelgen (
     input                    clk,
-    input                    prepline,
-    input [HCOUNT_BITSREQ:0] nextline,
+    input                    visible,
+    input                    startline,
     input [HCOUNT_BITSREQ:0] horicount,
+    input [HCOUNT_BITSREQ:0] vertcount,
 
     output pixel
 );
@@ -14,7 +15,7 @@ module pixelgen (
    wire [7:0] pixels_thisline;
 
    reg [2:0] counter = 0;
-   reg [15:0] pixels = 0;
+   reg [7:0] pixels = 0;
    reg [DUALPORT_BITSREQ:0] w_addr = HTILES;
    reg [DUALPORT_BITSREQ:0] r_addr = 0;
 
@@ -22,22 +23,22 @@ module pixelgen (
 
    charrom #() character_rom (
        .addr(character),
-       .row(nextline[2:0]),
+       .row(vertcount[2:0]),
        .pixels(pixels_nextline)
    );
 
    videoram #() video_ram (
-       .prepline (prepline),
+       .visible  (visible),
        .horicount(horicount),
-       .vertcount(nextline),
+       .vertcount(vertcount),
        .character(character)
    );
 
    dualport #() dual_port_ram (
        .w_clk (clk),
        .r_clk (clk),
-       .w_en  (prepline),
-       .r_en  (prepline),
+       .w_en  (visible),
+       .r_en  (startline),
        .w_addr(w_addr),
        .r_addr(r_addr),
        .w_data(pixels_nextline),
@@ -47,20 +48,20 @@ module pixelgen (
    always @(posedge clk) counter <= counter + 1;
 
    always @(posedge clk) begin
-      if (prepline && counter == 4) begin
+      if (visible && counter == 2) begin
          w_addr <= w_addr + 1;
+      end
+
+      if ((startline || visible) && counter == 2) begin
          r_addr <= r_addr + 1;
       end
    end
 
    always @(posedge clk) begin
-      if (prepline) begin
-         if (counter == 0) begin
-            pixels <= {pixels_thisline, pixels[8:1]};
-         end else begin
-            pixels <= pixels >> 1;
-         end
-      end else pixels <= 0;
+      if (startline || visible) begin
+         if (counter == 0) pixels <= pixels_thisline;
+         else pixels <= (pixels >> 1);
+      end
    end
 
 endmodule

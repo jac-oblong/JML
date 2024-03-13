@@ -11,7 +11,7 @@ module dualport (
 
    `include "vgaspecs.vh"
 
-   reg [7:0] mem[DUALPORT_SIZE:0];
+   reg [7:0] mem[0:DUALPORT_SIZE];
 
    always @(posedge w_clk) begin
       if (w_en) mem[w_addr] <= w_data;
